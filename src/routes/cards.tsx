@@ -69,7 +69,7 @@ function Cards() {
             <p className="sp-kicker">CSP retrieval lab</p>
             <h1 className="sp-title mt-2 text-4xl">Recall first. Reveal second.</h1>
             <p className="mt-2 max-w-2xl text-sm text-fg-muted">
-              Cards are generated from the structured lesson rules, worked cases, traps and decision maps — not one repeated template.
+              Cards are generated from structured lesson rules, worked cases, traps and decision maps — not one repeated template.
               The deck is shuffled so you cannot learn by card location or sequence.
             </p>
           </div>
@@ -139,7 +139,7 @@ function Cards() {
         </div>
 
         <div className="sp-card p-4 text-sm text-fg-muted">
-          <strong className="text-fg">Study rule:</strong> do not memorize the answer text. Explain the governing principle, apply it to a changed scenario, identify the distractor trap, and then teach it back. Candidate reports consistently emphasize understanding concepts rather than memorizing practice questions. citeturn0reddit52turn0reddit54
+          <strong className="text-fg">Study rule:</strong> do not memorize the answer text. Explain the governing principle, apply it to a changed scenario, identify the distractor trap, and then teach it back.
         </div>
       </div>
     </Shell>
