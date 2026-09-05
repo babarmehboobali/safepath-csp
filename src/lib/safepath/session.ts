@@ -92,12 +92,46 @@ export function writeSession(next: StudioSession) {
   persistSet(KEY, raw);
   persistSet(KEY_STABLE, raw);
   if (next.email) rememberEmail(next.email);
+  if (next.email) {
+    void import("./seats-api")
+      .then((api) => api.cloudSaveProgress({ data: next }))
+      .catch(() => undefined);
+  }
 }
 
 export async function hydrateSession() {
   const raw = (await persistHydrate(KEY)) || (await persistHydrate(KEY_STABLE));
   if (raw && !persistGet(KEY)) persistSet(KEY, raw);
-  return readSession();
+  const local = readSession();
+  if (local.email) {
+    try {
+      const { cloudLoadProgress } = await import("./seats-api");
+      const remote = await cloudLoadProgress({ data: { email: local.email } });
+      if (remote && typeof remote === "object") {
+        const merged: StudioSession = {
+          ...local,
+          ...remote,
+          email: local.email,
+          name: remote.name || local.name,
+          completed: Array.from(new Set([...(remote.completed || []), ...local.completed])),
+          exams: [...(remote.exams || []), ...local.exams].slice(0, 16),
+          studyDates: Array.from(new Set([...(remote.studyDates || []), ...local.studyDates])),
+          knownCards: Array.from(new Set([...(remote.knownCards || []), ...local.knownCards])),
+          missed: Array.from(new Set([...(remote.missed || []), ...local.missed])),
+          lessons: { ...(remote.lessons || {}), ...local.lessons },
+          agreed: remote.agreed || local.agreed,
+          track: local.track || remote.track,
+          industry: local.industry || remote.industry,
+        };
+        persistSet(KEY, JSON.stringify(merged));
+        persistSet(KEY_STABLE, JSON.stringify(merged));
+        return merged;
+      }
+    } catch {
+      /* stay local */
+    }
+  }
+  return local;
 }
 
 export function markStudy() {
