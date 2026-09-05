@@ -28,3 +28,30 @@
 
 @media (max-width:1000px){.practice-mission-grid,#desks .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:700px){.practice-mission-grid,#desks .grid{grid-template-columns:1fr}.practice-mission-card{min-height:185px}.sp-study-hero-actions{min-width:0}.sp-study-plan-cta{width:100%}}
+
+/* Specialist workspace cards: prominent topic signages and distinct skill colors. */
+.practice-lab-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.practice-lab-card{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:18px;min-height:126px;padding:20px 21px;border:1px solid #d6e1db;border-radius:17px;background:#fff;color:#14243b;text-decoration:none;box-shadow:0 5px 18px rgba(10,30,20,.055);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.practice-lab-card::before{content:"";position:absolute;z-index:-1;left:0;top:0;bottom:0;width:6px;background:var(--lab-accent,#087f5b)}
+.practice-lab-card::after{content:"";position:absolute;z-index:-1;right:-34px;top:-34px;width:122px;height:122px;border-radius:50%;background:var(--lab-wash,#e8f5ee);opacity:.9}
+.practice-lab-card:hover{transform:translateY(-4px);border-color:var(--lab-accent,#087f5b);box-shadow:0 15px 30px rgba(10,30,20,.11)}
+.practice-lab-icon{flex:0 0 60px;width:60px;height:60px;display:grid;place-items:center;border-radius:15px;background:var(--lab-wash,#e8f5ee);border:1px solid color-mix(in srgb,var(--lab-accent,#087f5b) 20%,transparent);color:var(--lab-accent,#087f5b);font:800 14px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.01em}
+.practice-lab-meta{display:inline-flex;align-items:center;margin-bottom:6px}
+.practice-lab-meta span{display:inline-flex;align-items:center;min-height:23px;padding:0 9px;border-radius:999px;background:var(--lab-wash,#e8f5ee);color:var(--lab-accent,#087f5b);font:800 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.11em}
+.practice-lab-card h3{margin:0;color:#13253d;font:600 20px/1.15 Georgia,"Times New Roman",serif;letter-spacing:-.02em}
+.practice-lab-card p{margin-top:6px;max-width:39ch;color:#6a7d92;font-size:13px;line-height:1.5}
+.practice-arrow{margin-left:auto;flex:0 0 auto;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--lab-wash,#e8f5ee);color:var(--lab-accent,#087f5b);font-size:19px;font-weight:800;transition:transform .18s ease}
+.practice-lab-card:hover .practice-arrow{transform:translateX(3px)}
+.practice-lab-card:nth-child(1){--lab-accent:#087f5b;--lab-wash:#d9f7ea}.practice-lab-card:nth-child(2){--lab-accent:#2563eb;--lab-wash:#dbeafe}.practice-lab-card:nth-child(3){--lab-accent:#7c3aed;--lab-wash:#ede9fe}.practice-lab-card:nth-child(4){--lab-accent:#0f766e;--lab-wash:#ccfbf1}.practice-lab-card:nth-child(5){--lab-accent:#d97706;--lab-wash:#fef3c7}.practice-lab-card:nth-child(6){--lab-accent:#475569;--lab-wash:#e2e8f0}.practice-lab-card:nth-child(7){--lab-accent:#ea580c;--lab-wash:#ffedd5}.practice-lab-card:nth-child(8){--lab-accent:#0284c7;--lab-wash:#e0f2fe}.practice-lab-card:nth-child(9){--lab-accent:#dc2626;--lab-wash:#fee2e2}.practice-lab-card:nth-child(10){--lab-accent:#15803d;--lab-wash:#dcfce7}.practice-lab-card:nth-child(11){--lab-accent:#ca8a04;--lab-wash:#fef9c3}.practice-lab-card:nth-child(12){--lab-accent:#be123c;--lab-wash:#ffe4e6}.practice-lab-card:nth-child(13){--lab-accent:#4338ca;--lab-wash:#e0e7ff}.practice-lab-card:nth-child(14){--lab-accent:#0891b2;--lab-wash:#cffafe}.practice-lab-card:nth-child(15){--lab-accent:#9333ea;--lab-wash:#f3e8ff}.practice-lab-card:nth-child(16){--lab-accent:#4f46e5;--lab-wash:#e0e7ff}.practice-lab-card:nth-child(17){--lab-accent:#059669;--lab-wash:#d1fae5}.practice-lab-card:nth-child(18){--lab-accent:#64748b;--lab-wash:#e2e8f0}
+
+/* Domain signage gets the same strong visual treatment. */
+.practice-domain-signage{padding:24px;border:1px solid #d6e1db;border-radius:18px;background:#fff;box-shadow:0 5px 18px rgba(10,30,20,.045)}
+.practice-domain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:20px}
+.practice-domain-sign{display:grid;grid-template-columns:52px minmax(0,1fr) 34px;align-items:center;gap:13px;min-height:82px;padding:12px 14px 12px 16px;border:1px solid #dce6e1;border-radius:14px;background:#fbfdfc;text-align:left;cursor:pointer;transition:.18s ease}
+.practice-domain-sign:hover{transform:translateY(-2px);border-color:var(--domain-accent,#0b7a43);box-shadow:0 8px 20px rgba(10,30,20,.08)}
+.practice-domain-sign>span{display:grid;place-items:center;width:48px;height:48px;border-radius:13px;font:800 12px/1 ui-monospace,SFMono-Regular,monospace}
+.practice-domain-sign div{min-width:0}.practice-domain-sign div b{display:block;color:#16283b;font:600 16px/1.2 Georgia,"Times New Roman",serif}.practice-domain-sign div small{display:block;margin-top:4px;color:#718196;font-size:11px;line-height:1.35}.practice-domain-sign i{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#fff;font-style:normal;font-size:17px;font-weight:800}
+
+@media (max-width:1050px){.practice-lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.practice-lab-grid,.practice-domain-grid{grid-template-columns:1fr}.practice-lab-card{min-height:116px;padding:17px;gap:14px}.practice-lab-icon{flex-basis:52px;width:52px;height:52px}.practice-lab-card h3{font-size:18px}.practice-domain-signage{padding:18px}}
+@media (max-width:430px){.practice-lab-card{align-items:flex-start}.practice-arrow{margin-top:8px}.practice-lab-card p{font-size:12px}}
