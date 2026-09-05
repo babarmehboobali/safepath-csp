@@ -8,6 +8,7 @@ import responsiveCss from "../responsive.css?url";
 import appearanceCss from "../appearance.css?url";
 import polishCss from "../csp-green-polish.css?url";
 import uxCss from "../csp-green-ux.css?url";
+import themeColorsCss from "../study-theme-colors.css?url";
 
 const SITE = "https://safepath-csp.com";
 const TITLE = "SafePath CSP | CSP Exam Prep";
@@ -18,7 +19,7 @@ const JSON_LD = {
   "@graph": [
     { "@type": "Organization", "@id": `${SITE}/#org`, name: "SafePath CSP", url: SITE, email: "suggestions@safepath-csp.com", logo: `${SITE}/brand/logo-mark.png`, description: "Independent Certified Safety Professional (CSP-11) study software. Not affiliated with BCSP or Pearson VUE." },
     { "@type": "WebSite", "@id": `${SITE}/#site`, url: SITE, name: "SafePath CSP", description: DESC, publisher: { "@id": `${SITE}/#org` }, inLanguage: "en-US" },
-    { "@type": "SoftwareApplication", "@id": `${SITE}/#app`, name: "SafePath CSP", applicationCategory: "EducationalApplication", operatingSystem: "Web", url: SITE, description: DESC, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@id": `${SITE}/#org` } },
+    { "@type": "SoftwareApplication", "@id": `${SITE}/#app`, name: "SafePath CSP", applicationCategory: "EducationalApplication", operatingSystem: "Web", url: SITE, description: DESC, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@id": `${SITE}/#org` },
   ],
 };
 
@@ -56,6 +57,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appearanceCss },
       { rel: "stylesheet", href: polishCss },
       { rel: "stylesheet", href: uxCss },
+      { rel: "stylesheet", href: themeColorsCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
