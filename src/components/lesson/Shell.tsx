@@ -5,20 +5,18 @@ import { useAppearance } from "@/components/AppearanceProvider";
 import { hydrateSession } from "@/lib/safepath/session";
 
 const LINKS = [
-  { to: "/today", label: "Today" },
-  { to: "/studio", label: "Learning" },
-  { to: "/plan", label: "Plan" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/studio", label: "Study" },
   { to: "/practice", label: "Practice" },
-  { to: "/games", label: "Games" },
-  { to: "/coach", label: "Coach" },
-  { to: "/ready", label: "Ready" },
-  { to: "/assess", label: "Self-assessment" },
-  { to: "/mock", label: "Mock" },
+  { to: "/mock", label: "Mock Exams" },
+  { to: "/games", label: "Flashcards" },
+  { to: "/ready", label: "Progress" },
 ] as const;
 
 const SIDEBAR = [
   { to: "/", label: "Study Home", icon: "⌂" },
   { to: "/studio", label: "All Modules", icon: "▦" },
+  { to: "/studio", label: "Module 04", icon: "▣" },
   { to: "/studio", label: "Study Notes", icon: "▤" },
   { to: "/ready", label: "Key Points", icon: "✣" },
   { to: "/practice", label: "Practice Questions", icon: "✓" },
@@ -26,6 +24,7 @@ const SIDEBAR = [
   { to: "/mock", label: "Quizzes", icon: "◉" },
   { to: "/bank", label: "Glossary", icon: "▥" },
   { to: "/plan", label: "Mind Maps", icon: "⌘" },
+  { to: "/calculator", label: "Downloads", icon: "⇩" },
   { to: "/account", label: "Bookmarks", icon: "♧" },
 ] as const;
 
@@ -34,7 +33,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
   const { appearance } = useAppearance();
-  const professional = appearance === "professional";
+  const referenceTheme = appearance === "csp-green" || appearance === "professional";
 
   useEffect(() => {
     void hydrateSession().then((s) => {
@@ -46,17 +45,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const first = name.split(" ")[0];
 
   return (
-    <div className={`sp-shell ${professional ? "sp-shell-professional" : ""}`}>
+    <div className={`sp-shell ${referenceTheme ? "sp-shell-professional" : ""} ${appearance === "csp-green" ? "sp-shell-csp-green" : ""}`}>
       <header className="sticky top-0 z-20 border-b border-border bg-bg/92 backdrop-blur-xl">
         <div className="sp-wrap flex items-center gap-3 py-3">
-          <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <img src="/brand/logo-mark.png" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
+          <Link to="/" className="sp-brand flex items-center gap-2 font-semibold tracking-tight">
+            <img src="/brand/logo-mark.png" alt="" width={36} height={36} className="h-9 w-9 object-contain" />
             <span>
               <span className="block">SafePath CSP</span>
-              {professional ? <span className="block text-[10px] font-normal opacity-70">Your AI-Powered CSP Coach</span> : null}
+              {referenceTheme ? <span className="block text-[10px] font-normal opacity-80">Your AI-Powered CSP Coach</span> : null}
             </span>
           </Link>
-          <nav className="ml-auto hidden items-center gap-1 text-sm lg:flex">
+          <nav className="sp-top-nav ml-auto hidden items-center gap-1 text-sm lg:flex">
             {LINKS.map((row) => (
               <Link key={row.to} to={row.to} className="sp-btn sp-btn-ghost px-3">
                 {row.label}
@@ -85,18 +84,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
         ) : null}
       </header>
 
-      <div className={professional ? "sp-professional-layout" : ""}>
-        {professional ? (
+      <div className={referenceTheme ? "sp-professional-layout" : ""}>
+        {referenceTheme ? (
           <aside className="sp-professional-sidebar" aria-label="Study navigation">
             <div className="sp-sidebar-section-title">Study</div>
-            {SIDEBAR.slice(0, 7).map((row) => (
-              <Link key={`${row.to}-${row.label}`} to={row.to} className="sp-sidebar-link">
+            {SIDEBAR.slice(0, 8).map((row, index) => (
+              <Link key={`${row.to}-${row.label}`} to={row.to} className={`sp-sidebar-link ${index === 2 ? "is-module" : ""}`}>
                 <span className="sp-sidebar-icon" aria-hidden="true">{row.icon}</span>
                 <span>{row.label}</span>
               </Link>
             ))}
             <div className="sp-sidebar-section-title sp-sidebar-tools">Tools</div>
-            {SIDEBAR.slice(7).map((row) => (
+            {SIDEBAR.slice(8).map((row) => (
               <Link key={`${row.to}-${row.label}`} to={row.to} className="sp-sidebar-link">
                 <span className="sp-sidebar-icon" aria-hidden="true">{row.icon}</span>
                 <span>{row.label}</span>
@@ -105,7 +104,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </aside>
         ) : null}
 
-        <div className={professional ? "sp-professional-content" : ""}>
+        <div className={referenceTheme ? "sp-professional-content" : ""}>
           <main className="flex-1 py-8 sm:py-12">{children}</main>
           <footer className="border-t border-border py-8">
             <div className="sp-wrap grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -115,31 +114,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="grid gap-1 text-sm text-fg-muted">
                 <p className="font-medium text-fg">Study</p>
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/plan">Plan</Link>
-                <Link to="/today">Today</Link>
-                <Link to="/assess">Self-assessment</Link>
-                <Link to="/mock">Mock exam</Link>
-                <Link to="/studio">Learning</Link>
+                <Link to="/dashboard">Dashboard</Link><Link to="/plan">Plan</Link><Link to="/today">Today</Link><Link to="/assess">Self-assessment</Link><Link to="/mock">Mock exam</Link><Link to="/studio">Learning</Link>
               </div>
               <div className="grid gap-1 text-sm text-fg-muted">
                 <p className="font-medium text-fg">Tools</p>
-                <Link to="/games">Games</Link>
-                <Link to="/practice">Practice</Link>
-                <Link to="/bank">Bank</Link>
-                <Link to="/calculator">Calculator</Link>
-                <Link to="/exam-day">Exam day</Link>
+                <Link to="/games">Games</Link><Link to="/practice">Practice</Link><Link to="/bank">Bank</Link><Link to="/calculator">Calculator</Link><Link to="/exam-day">Exam day</Link>
               </div>
               <div className="grid gap-1 text-sm text-fg-muted">
                 <p className="font-medium text-fg">Account</p>
-                <Link to="/login">Log in / reset</Link>
-                <Link to="/account">Seat</Link>
-                <Link to="/ergo">Ergo lab</Link>
-                <Link to="/tox">Tox lab</Link>
-                <Link to="/math">Math desk</Link>
-                <Link to="/disclaimer">Disclaimer</Link>
-                <Link to="/contact">Contact / suggestions</Link>
-                <Link to="/about">About</Link>
+                <Link to="/login">Log in / reset</Link><Link to="/account">Seat</Link><Link to="/ergo">Ergo lab</Link><Link to="/tox">Tox lab</Link><Link to="/math">Math desk</Link><Link to="/disclaimer">Disclaimer</Link><Link to="/contact">Contact / suggestions</Link><Link to="/about">About</Link>
                 <div className="pt-3"><MediaQualityPicker /></div>
               </div>
             </div>
