@@ -1,5 +1,6 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
+import { AppearanceProvider } from "@/components/AppearanceProvider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { CanonicalHost } from "@/components/CanonicalHost";
 import appCss from "../styles.css?url";
@@ -13,35 +14,9 @@ const DESC =
 const JSON_LD = {
   "@context": "https://schema.org",
   "@graph": [
-    {
-      "@type": "Organization",
-      "@id": `${SITE}/#org`,
-      name: "SafePath CSP",
-      url: SITE,
-      email: "suggestions@safepath-csp.com",
-      logo: `${SITE}/brand/logo-mark.png`,
-      description: "Independent Certified Safety Professional (CSP-11) study software. Not affiliated with BCSP or Pearson VUE.",
-    },
-    {
-      "@type": "WebSite",
-      "@id": `${SITE}/#site`,
-      url: SITE,
-      name: "SafePath CSP",
-      description: DESC,
-      publisher: { "@id": `${SITE}/#org` },
-      inLanguage: "en-US",
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": `${SITE}/#app`,
-      name: "SafePath CSP",
-      applicationCategory: "EducationalApplication",
-      operatingSystem: "Web",
-      url: SITE,
-      description: DESC,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      publisher: { "@id": `${SITE}/#org` },
-    },
+    { "@type": "Organization", "@id": `${SITE}/#org`, name: "SafePath CSP", url: SITE, email: "suggestions@safepath-csp.com", logo: `${SITE}/brand/logo-mark.png`, description: "Independent Certified Safety Professional (CSP-11) study software. Not affiliated with BCSP or Pearson VUE." },
+    { "@type": "WebSite", "@id": `${SITE}/#site`, url: SITE, name: "SafePath CSP", description: DESC, publisher: { "@id": `${SITE}/#org` }, inLanguage: "en-US" },
+    { "@type": "SoftwareApplication", "@id": `${SITE}/#app`, name: "SafePath CSP", applicationCategory: "EducationalApplication", operatingSystem: "Web", url: SITE, description: DESC, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@id": `${SITE}/#org` } },
   ],
 };
 
@@ -80,10 +55,7 @@ export const Route = createRootRoute({
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap",
-      },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap" },
     ],
   }),
   component: () => (
@@ -96,7 +68,9 @@ export const Route = createRootRoute({
         <PreviewHostBridge />
         <CanonicalHost />
         <AuthProvider>
-          <Outlet />
+          <AppearanceProvider>
+            <Outlet />
+          </AppearanceProvider>
         </AuthProvider>
         <Scripts />
       </body>
