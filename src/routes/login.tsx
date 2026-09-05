@@ -31,9 +31,7 @@ function Login() {
       const email = s.email || rememberedEmail();
       setSavedEmail(email);
       if (s.agreed) setAgreed(true);
-      if (s.email) {
-        /* already signed in on this device */
-      }
+      if (s.email) navigate({ to: "/today" });
     });
   }, []);
 
