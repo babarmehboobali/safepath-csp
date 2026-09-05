@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export const APPEARANCE_STORAGE_KEY = "safepath-appearance";
 export const ACCENT_STORAGE_KEY = "safepath-accent";
-
+export const DISPLAY_STORAGE_KEY = "safepath-display";
 export const APPEARANCE_STYLES = [
   { id: "csp-green", label: "CSP Green", description: "The complete SafePath study layout with balanced typography, spacing, and CSP green accents", tone: "Recommended" },
   { id: "professional", label: "Professional Light", description: "The clean CSP study layout from your reference", tone: "Light" },
@@ -15,7 +15,6 @@ export const APPEARANCE_STYLES = [
   { id: "purple", label: "Purple", description: "Focus and creativity", tone: "Focus" },
   { id: "contrast", label: "High Contrast", description: "Enhanced accessibility", tone: "Accessible" },
 ] as const;
-
 export const ACCENT_COLORS = [
   { id: "emerald", label: "CSP Emerald", value: "#0b7a43", dark: "#075b35", soft: "#dff1e7", pale: "#f1f8f4" },
   { id: "blue", label: "Safety Blue", value: "#1769aa", dark: "#104d80", soft: "#deecf8", pale: "#f1f7fc" },
@@ -25,70 +24,36 @@ export const ACCENT_COLORS = [
   { id: "rose", label: "Rose", value: "#b23b63", dark: "#7e2847", soft: "#f5dfe7", pale: "#fcf3f6" },
   { id: "slate", label: "Slate", value: "#425a72", dark: "#2d4053", soft: "#e3e9ef", pale: "#f5f7f9" },
 ] as const;
-
 export type AppearanceId = (typeof APPEARANCE_STYLES)[number]["id"];
 export type AccentId = (typeof ACCENT_COLORS)[number]["id"];
+export type DisplaySettings = { fontScale: "small" | "default" | "large" | "xlarge"; density: "compact" | "comfortable" | "spacious"; sidebar: "left" | "right" | "hidden"; contentWidth: "standard" | "wide" | "full"; showAnimations: boolean; showSidebarLabels: boolean };
+export const DEFAULT_DISPLAY: DisplaySettings = { fontScale: "default", density: "comfortable", sidebar: "left", contentWidth: "standard", showAnimations: true, showSidebarLabels: true };
 
-const AppearanceContext = createContext<{
-  appearance: AppearanceId;
-  setAppearance: (id: AppearanceId) => void;
-  accent: AccentId;
-  setAccent: (id: AccentId) => void;
-} | null>(null);
-
-function isAppearanceId(value: string | null): value is AppearanceId {
-  return APPEARANCE_STYLES.some((style) => style.id === value);
-}
-function isAccentId(value: string | null): value is AccentId {
-  return ACCENT_COLORS.some((color) => color.id === value);
-}
-
+const AppearanceContext = createContext<{ appearance: AppearanceId; setAppearance: (id: AppearanceId) => void; accent: AccentId; setAccent: (id: AccentId) => void; display: DisplaySettings; setDisplay: <K extends keyof DisplaySettings>(key: K, value: DisplaySettings[K]) => void; resetDisplay: () => void } | null>(null);
+function isAppearanceId(value: string | null): value is AppearanceId { return APPEARANCE_STYLES.some((style) => style.id === value); }
+function isAccentId(value: string | null): value is AccentId { return ACCENT_COLORS.some((color) => color.id === value); }
 function applyAppearance(id: AppearanceId, accentId: AccentId) {
   const accent = ACCENT_COLORS.find((item) => item.id === accentId) ?? ACCENT_COLORS[0];
-  document.documentElement.dataset.spTheme = id;
-  document.documentElement.dataset.spAccent = accentId;
-  document.documentElement.style.setProperty("--sp-user-accent", accent.value);
-  document.documentElement.style.setProperty("--sp-user-accent-dark", accent.dark);
-  document.documentElement.style.setProperty("--sp-user-accent-soft", accent.soft);
-  document.documentElement.style.setProperty("--sp-user-accent-pale", accent.pale);
-  document.documentElement.style.colorScheme =
-    id === "csp-green" || id === "professional" || id === "modern" || id === "minimal" || id === "ocean" || id === "sunset" || id === "purple"
-      ? "light"
-      : "dark";
+  document.documentElement.dataset.spTheme = id; document.documentElement.dataset.spAccent = accentId;
+  document.documentElement.style.setProperty("--sp-user-accent", accent.value); document.documentElement.style.setProperty("--sp-user-accent-dark", accent.dark); document.documentElement.style.setProperty("--sp-user-accent-soft", accent.soft); document.documentElement.style.setProperty("--sp-user-accent-pale", accent.pale);
+  document.documentElement.style.colorScheme = ["csp-green", "professional", "modern", "minimal", "ocean", "sunset", "purple"].includes(id) ? "light" : "dark";
 }
-
+function applyDisplay(d: DisplaySettings) {
+  const root = document.documentElement; root.dataset.spFontScale = d.fontScale; root.dataset.spDensity = d.density; root.dataset.spSidebar = d.sidebar; root.dataset.spContentWidth = d.contentWidth; root.dataset.spAnimations = d.showAnimations ? "on" : "off"; root.dataset.spSidebarLabels = d.showSidebarLabels ? "on" : "off";
+}
 export function AppearanceProvider({ children }: { children: React.ReactNode }) {
-  const [appearance, setAppearanceState] = useState<AppearanceId>("csp-green");
-  const [accent, setAccentState] = useState<AccentId>("emerald");
-
+  const [appearance, setAppearanceState] = useState<AppearanceId>("csp-green"); const [accent, setAccentState] = useState<AccentId>("emerald"); const [display, setDisplayState] = useState<DisplaySettings>(DEFAULT_DISPLAY);
   useEffect(() => {
-    const savedAppearance = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    const savedAccent = window.localStorage.getItem(ACCENT_STORAGE_KEY);
-    const nextAppearance = isAppearanceId(savedAppearance) ? savedAppearance : "csp-green";
-    const nextAccent = isAccentId(savedAccent) ? savedAccent : "emerald";
-    setAppearanceState(nextAppearance);
-    setAccentState(nextAccent);
-    applyAppearance(nextAppearance, nextAccent);
+    const savedAppearance = window.localStorage.getItem(APPEARANCE_STORAGE_KEY); const savedAccent = window.localStorage.getItem(ACCENT_STORAGE_KEY);
+    const nextAppearance = isAppearanceId(savedAppearance) ? savedAppearance : "csp-green"; const nextAccent = isAccentId(savedAccent) ? savedAccent : "emerald";
+    setAppearanceState(nextAppearance); setAccentState(nextAccent); applyAppearance(nextAppearance, nextAccent);
+    try { const saved = JSON.parse(window.localStorage.getItem(DISPLAY_STORAGE_KEY) || "null") as Partial<DisplaySettings> | null; const next = saved ? { ...DEFAULT_DISPLAY, ...saved } : DEFAULT_DISPLAY; setDisplayState(next); applyDisplay(next); } catch { applyDisplay(DEFAULT_DISPLAY); }
   }, []);
-
-  const setAppearance = (id: AppearanceId) => {
-    setAppearanceState(id);
-    window.localStorage.setItem(APPEARANCE_STORAGE_KEY, id);
-    applyAppearance(id, accent);
-  };
-
-  const setAccent = (id: AccentId) => {
-    setAccentState(id);
-    window.localStorage.setItem(ACCENT_STORAGE_KEY, id);
-    applyAppearance(appearance, id);
-  };
-
-  const value = useMemo(() => ({ appearance, setAppearance, accent, setAccent }), [appearance, accent]);
+  const setAppearance = (id: AppearanceId) => { setAppearanceState(id); window.localStorage.setItem(APPEARANCE_STORAGE_KEY, id); applyAppearance(id, accent); };
+  const setAccent = (id: AccentId) => { setAccentState(id); window.localStorage.setItem(ACCENT_STORAGE_KEY, id); applyAppearance(appearance, id); };
+  const setDisplay = <K extends keyof DisplaySettings>(key: K, value: DisplaySettings[K]) => { setDisplayState((current) => { const next = { ...current, [key]: value }; window.localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(next)); applyDisplay(next); return next; }); };
+  const resetDisplay = () => { setDisplayState(DEFAULT_DISPLAY); window.localStorage.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(DEFAULT_DISPLAY)); applyDisplay(DEFAULT_DISPLAY); };
+  const value = useMemo(() => ({ appearance, setAppearance, accent, setAccent, display, setDisplay, resetDisplay }), [appearance, accent, display]);
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
 }
-
-export function useAppearance() {
-  const value = useContext(AppearanceContext);
-  if (!value) throw new Error("useAppearance must be used inside AppearanceProvider");
-  return value;
-}
+export function useAppearance() { const value = useContext(AppearanceContext); if (!value) throw new Error("useAppearance must be used inside AppearanceProvider"); return value; }
