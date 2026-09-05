@@ -9,8 +9,10 @@ import { TrackPicker, labelForTrack } from "@/components/lesson/TrackPicker";
 
 export const Route = createFileRoute("/studio")({ component: Studio });
 
+const ALL_DOMAINS = [1, 2, 3, 4, 5, 6, 7] as const;
+
 function Studio() {
-  const [domains, setDomains] = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
+  const [domains, setDomains] = useState<number[]>([...ALL_DOMAINS]);
   const [query, setQuery] = useState("");
   const [done, setDone] = useState<number[]>([]);
   const [track, setTrack] = useState<TrackId>("recommended");
@@ -23,10 +25,11 @@ function Studio() {
   }, []);
 
   const pool = catalogForTrack(track);
+  const domainCounts = useMemo(() => Object.fromEntries(ALL_DOMAINS.map((d) => [d, pool.filter((row) => row.domain === d).length])) as Record<number, number>, [pool]);
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     return pool.filter((row) => {
-      if (domains.length && !domains.includes(row.domain)) return false;
+      if (domains.length === 0 || !domains.includes(row.domain)) return false;
       if (showDone === "remaining" && done.includes(row.id)) return false;
       if (showDone === "done" && !done.includes(row.id)) return false;
       if (!q) return true;
@@ -37,6 +40,17 @@ function Studio() {
   const continueRow = pool.find((row) => !done.includes(row.id)) ?? pool[0];
   const completedInTrack = pool.filter((row) => done.includes(row.id)).length;
   const completionPct = pool.length ? Math.round((completedInTrack / pool.length) * 100) : 0;
+  const allSelected = domains.length === ALL_DOMAINS.length;
+
+  function toggleAllDomains() {
+    setDomains(allSelected ? [] : [...ALL_DOMAINS]);
+  }
+
+  function toggleDomain(domain: number) {
+    setDomains((current) => current.includes(domain)
+      ? current.filter((d) => d !== domain)
+      : [...current, domain].sort((a, b) => a - b));
+  }
 
   return (
     <Shell>
@@ -45,7 +59,7 @@ function Studio() {
           <div>
             <p className="sp-kicker">Learning workspace</p>
             <h1>Study with a plan, not a list.</h1>
-            <p>Choose your track, focus a domain, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p>
+            <p>Choose your track, focus one or more domains, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p>
           </div>
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, task, or title" className="sp-field sp-study-search" aria-label="Search classes" />
         </section>
@@ -66,25 +80,29 @@ function Studio() {
         <TrackPicker track={track} onChange={setTrack} />
 
         <section className="space-y-3">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div><p className="sp-kicker">CSP-11 domains</p><p className="text-sm text-fg-muted">Tap a domain to focus your study view. Tap again to include it with others.</p></div>
-            <button type="button" className={`sp-btn px-3 text-sm ${domains.length === 7 ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={() => setDomains([1, 2, 3, 4, 5, 6, 7])}>All domains</button>
+          <div className="sp-domain-heading">
+            <div><p className="sp-kicker">CSP-11 domains</p><p className="text-sm text-fg-muted">Select any combination. <strong>All domains</strong> selects all seven; click it again to clear the selection.</p></div>
+            <button type="button" className={`sp-btn px-3 text-sm ${allSelected ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={toggleAllDomains} aria-pressed={allSelected}>{allSelected ? "All domains" : "Select all"}</button>
           </div>
-          <div className="sp-domain-grid">
-            {[1, 2, 3, 4, 5, 6, 7].map((d) => {
+          <div className="sp-domain-grid" role="group" aria-label="CSP-11 domain filters">
+            {ALL_DOMAINS.map((d) => {
               const on = domains.includes(d);
               const domainPool = pool.filter((row) => row.domain === d);
               const domainDone = domainPool.filter((row) => done.includes(row.id)).length;
               const pct = domainPool.length ? Math.round((domainDone / domainPool.length) * 100) : 0;
               return (
-                <button key={d} type="button" onClick={() => { const next = on ? domains.filter((x) => x !== d) : [...domains, d]; setDomains(next.length ? next.sort((a, b) => a - b) : [1, 2, 3, 4, 5, 6, 7]); }} className={`sp-domain-tile ${on ? "is-active" : ""}`} aria-pressed={on}>
-                  <p className="font-mono text-[10px] text-accent">D{d} · {CSP_DOMAIN_WEIGHTS[d as keyof typeof CSP_DOMAIN_WEIGHTS]}%</p>
+                <button key={d} type="button" onClick={() => toggleDomain(d)} className={`sp-domain-tile ${on ? "is-active" : ""}`} aria-pressed={on} aria-label={`${CSP_DOMAIN_NAMES[d as keyof typeof CSP_DOMAIN_NAMES]}, ${domainCounts[d] ?? 0} classes, ${on ? "selected" : "not selected"}`}>
+                  <div className="sp-domain-tile-top"><p className="font-mono text-[10px] text-accent">D{d} · {CSP_DOMAIN_WEIGHTS[d as keyof typeof CSP_DOMAIN_WEIGHTS]}%</p><span className="sp-domain-select-mark" aria-hidden="true">{on ? "✓" : ""}</span></div>
                   <p className="mt-1 truncate text-sm font-semibold">{DOMAIN_SHORT[d as keyof typeof DOMAIN_SHORT]}</p>
-                  <p className="mt-1 truncate text-[11px] text-fg-muted">{domainDone}/{domainPool.length} done</p>
+                  <p className="mt-1 text-[11px] text-fg-muted">{domainCounts[d] ?? 0} classes · {domainDone} done</p>
                   <div className="sp-domain-progress"><span style={{ width: `${pct}%` }} /></div>
                 </button>
               );
             })}
+          </div>
+          <div className={`sp-domain-selection-summary ${domains.length === 0 ? "is-empty" : ""}`} aria-live="polite">
+            <span>{domains.length === 0 ? "No domain selected" : `${domains.length} of 7 domains selected`}</span>
+            <strong>{rows.length} classes shown</strong>
           </div>
         </section>
 
@@ -113,7 +131,7 @@ function Studio() {
               })}
             </div>
           ) : (
-            <div className="sp-card p-8 text-center"><p className="font-serif text-xl">No classes match these filters.</p><p className="mt-2 text-sm text-fg-muted">Try another search, domain, or status.</p></div>
+            <div className="sp-card p-8 text-center"><p className="font-serif text-xl">{domains.length === 0 ? "Choose a domain to start studying." : "No classes match these filters."}</p><p className="mt-2 text-sm text-fg-muted">{domains.length === 0 ? "Click All domains or select one or more domain cards above." : "Try another search, domain, or status."}</p></div>
           )}
         </section>
       </div>
