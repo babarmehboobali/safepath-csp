@@ -1,0 +1,98 @@
+{
+  "$schema": "csp-app-v3-questions-schema",
+  "metadata": {
+    "version": "3.0.0",
+    "lastUpdated": "2026-09-05",
+    "totalQuestions": 2,
+    "practiceConfig": {
+      "mode": "flexible",
+      "limits": {
+        "fullExamMockTarget": 200,
+        "defaultSessionQuizCount": 20,
+        "domainScenarioLimit": 50,
+        "flashcardMasteryPool": 280
+      },
+      "customClassPracticeLimits": {
+        "session_1": { "targetPracticeQuestions": 25, "timeLimitMinutes": 35 },
+        "session_2": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_3": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_4": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_5": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_6": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_7": { "targetPracticeQuestions": 20, "timeLimitMinutes": 30 },
+        "session_8": { "targetPracticeQuestions": 25, "timeLimitMinutes": 35 },
+        "session_9_14": { "targetPracticeQuestions": 30, "timeLimitMinutes": 45 }
+      }
+    }
+  },
+  "questions": [
+    {
+      "id": "CSP-Q-0001",
+      "hashKey": "a_safety_manager_tests_combustible_gas_levels_inside_a_hydrocarbon",
+      "classification": {
+        "sessionId": 1,
+        "sessionTitle": "Advanced Applied Mathematics & Stat",
+        "domainId": 1,
+        "domainTitle": "Domain 1: Advanced Sciences & Math",
+        "standardOrCode": "NFPA 69 / API 2015",
+        "tags": ["LFL", "Combustible Gas", "Math", "Atmospheric Testing"]
+      },
+      "question": "A safety manager tests combustible gas levels inside a hydrocarbon storage vessel. The lower explosive limit (LFL) of the vapor is 1.4% by volume. The portable multi-gas detector reads 25% of the LFL. What is the actual volumetric concentration of the vapor inside the tank?",
+      "options": [
+        "0.35% by volume",
+        "0.70% by volume",
+        "1.05% by volume",
+        "3.50% by volume"
+      ],
+      "correct": 0,
+      "explanation": "Step 1: Identify that 100% LFL corresponds to 1.4% actual vapor concentration by volume. Step 2: Calculate the measured percentage: 0.25 × 1.4% = 0.35% by volume.",
+      "applicability": {
+        "includeInQuizPortal": true,
+        "includeInDomainScenarios": true,
+        "includeInFullMock": true,
+        "includeInSelfAssessment": true
+      },
+      "flashcardEquivalent": {
+        "enabled": true,
+        "cardCategory": "math",
+        "badge": "Applied Calculations",
+        "front": "Calculating Volumetric % from % LFL",
+        "back": "Actual % by Vol = (% LFL Instrument Reading / 100) × Pure Chemical LFL Volumetric Threshold."
+      }
+    },
+    {
+      "id": "CSP-Q-0002",
+      "hashKey": "when_evaluating_an_employee_exposed_to_both_n_hexane_and_methyl",
+      "classification": {
+        "sessionId": 2,
+        "sessionTitle": "Industrial Hygiene & Toxicology",
+        "domainId": 5,
+        "domainTitle": "Domain 5: Industrial Hygiene & Occupational Health",
+        "standardOrCode": "29 CFR 1910.1000 / ACGIH",
+        "tags": ["Toxicology", "Potentiation", "Solvents", "Nervous System"]
+      },
+      "question": "When evaluating an employee exposed to both n-hexane and methyl ethyl ketone (MEK), what toxicological phenomenon is of paramount concern to the industrial hygienist?",
+      "options": [
+        "Chemical antagonism neutralizing peripheral neurotoxicity",
+        "Potentiation of n-hexane neurotoxicity induced by MEK",
+        "Independent toxic action on unrelated organ systems",
+        "Complete metabolic inhibition of 2,5-hexanedione production"
+      ],
+      "correct": 1,
+      "explanation": "Technical Principle: MEK potentiates the neurotoxicity of n-hexane by stimulating liver mixed-function oxidases, accelerating the conversion of n-hexane to 2,5-hexanedione, causing rapid peripheral neuropathy.",
+      "applicability": {
+        "includeInQuizPortal": true,
+        "includeInDomainScenarios": true,
+        "includeInFullMock": true,
+        "includeInSelfAssessment": true
+      },
+      "flashcardEquivalent": {
+        "enabled": true,
+        "cardCategory": "ih",
+        "badge": "Toxicology",
+        "front": "n-Hexane + MEK Interaction",
+        "back": "Potentiation: MEK markedly accelerates the induction of 2,5-hexanedione, amplifying peripheral motor neuropathy."
+      }
+    }
+  ]
+}
