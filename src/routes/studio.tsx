@@ -6,7 +6,7 @@ import { CSP_DOMAIN_NAMES, CSP_DOMAIN_WEIGHTS, DOMAIN_SHORT } from "@/lib/safepa
 import { stillForClass } from "@/lib/safepath/media";
 import { readSession, type TrackId } from "@/lib/safepath/session";
 import { TrackPicker, labelForTrack } from "@/components/lesson/TrackPicker";
-import { hasSavedPlan, readPlan } from "@/lib/safepath/planner";
+import { hasSavedPlan, planDeadlineStatus, readPlan } from "@/lib/safepath/planner";
 
 export const Route = createFileRoute("/studio")({ component: Studio });
 const ALL_DOMAINS = [1, 2, 3, 4, 5, 6, 7] as const;
@@ -20,15 +20,15 @@ function Studio() {
   const [track, setTrack] = useState<TrackId>("recommended");
   const [showDone, setShowDone] = useState<StatusFilter>("all");
   const [planSaved, setPlanSaved] = useState(false);
-  const [planSummary, setPlanSummary] = useState("Not created yet");
+  const [plan, setPlan] = useState(readPlan());
 
   function refresh() {
     const session = readSession();
-    const saved = hasSavedPlan();
-    const plan = readPlan();
-    setDone(session.completed); setFlagged(session.flaggedClasses); setTrack(session.track);
-    setPlanSaved(saved);
-    setPlanSummary(saved ? `${plan.domains.length} domains · ${plan.dailyHours} h/day · ${plan.mode === "domain" ? "domain blocks" : plan.mode === "choice" ? "your order" : plan.mode === "mix" ? "mixed" : "adaptive"}` : "Not created yet");
+    setDone(session.completed);
+    setFlagged(session.flaggedClasses);
+    setTrack(session.track);
+    setPlanSaved(hasSavedPlan());
+    setPlan(readPlan());
   }
   useEffect(() => { refresh(); const onFocus = () => refresh(); window.addEventListener("focus", onFocus); return () => window.removeEventListener("focus", onFocus); }, []);
 
@@ -49,9 +49,11 @@ function Studio() {
   const continueRow = pool.find((row) => !done.includes(row.id)) ?? pool[0];
   const completedInTrack = pool.filter((row) => done.includes(row.id)).length;
   const completionPct = pool.length ? Math.round((completedInTrack / pool.length) * 100) : 0;
+  const deadline = useMemo(() => planDeadlineStatus(plan, track, done), [plan, track, done]);
   const allSelected = domains.length === ALL_DOMAINS.length;
   function toggleAllDomains() { setDomains(allSelected ? [] : [...ALL_DOMAINS]); }
   function toggleDomain(domain: number) { setDomains((current) => current.includes(domain) ? current.filter((d) => d !== domain) : [...current, domain].sort((a, b) => a - b)); }
+  function formatDate(value: string) { return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); }
 
   return (
     <Shell>
@@ -59,10 +61,25 @@ function Studio() {
         <section className="sp-study-hero">
           <div><p className="sp-kicker">Learning workspace</p><h1>Study with a plan, not a list.</h1><p>Choose your track, focus one or more domains, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p></div>
           <div className="sp-study-hero-actions">
-            <Link to="/plan" className={`sp-study-plan-cta ${planSaved ? "is-ready" : ""}`}><span className="sp-study-plan-icon">{planSaved ? "✓" : "⌘"}</span><span><b>{planSaved ? "Study plan ready" : "Build study plan"}</b><small>{planSaved ? planSummary : "Set your date, method & domain order"}</small></span><strong>→</strong></Link>
+            <Link to="/plan" className={`sp-study-plan-cta ${planSaved ? "is-ready" : ""}`}><span className="sp-study-plan-icon">{planSaved ? "✓" : "⌘"}</span><span><b>{planSaved ? "Study plan ready" : "Build study plan"}</b><small>{planSaved ? `${deadline.daysRemaining} days left · target ${formatDate(plan.examDate)}` : "Set your date, method & domain order"}</small></span><strong>→</strong></Link>
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, task, or title" className="sp-field sp-study-search" aria-label="Search classes" />
           </div>
         </section>
+
+        {planSaved ? <section className={`sp-deadline-card is-${deadline.status}`} aria-label="Study plan deadline status">
+          <div className="sp-deadline-head"><div><p className="sp-kicker">Plan health</p><h2>{deadline.label}</h2><p>{deadline.detail}</p></div><div className="sp-deadline-days"><strong>{deadline.daysRemaining}</strong><span>days remaining</span></div></div>
+          <div className="sp-deadline-track" aria-label={`${deadline.actualPct}% course completion`}><span style={{ width: `${deadline.actualPct}%` }} /></div>
+          <div className="sp-deadline-grid">
+            <div><b>{deadline.actualPct}%</b><span>completed</span></div>
+            <div><b>{deadline.expectedPct}%</b><span>expected today</span></div>
+            <div><b>{deadline.remainingClasses}</b><span>classes left</span></div>
+            <div><b>{deadline.requiredClassesPerDay.toFixed(1)}</b><span>classes/day to finish</span></div>
+            <div><b>{formatDate(deadline.plannedFinishDate)}</b><span>map finish date</span></div>
+            <div><b>{formatDate(plan.examDate)}</b><span>exam target</span></div>
+          </div>
+          {deadline.status === "behind" ? <div className="sp-deadline-action"><span>Catch-up pace: complete about {deadline.requiredClassesPerDay.toFixed(1)} classes each day from now.</span><Link to="/plan" className="sp-btn sp-btn-primary">Adjust plan →</Link></div> : deadline.status === "plan-too-slow" ? <div className="sp-deadline-action"><span>Your generated 5-classes/week map is slower than the target. Shorten the target, increase study capacity, or reduce the selected scope.</span><Link to="/plan" className="sp-btn sp-btn-primary">Fix schedule →</Link></div> : null}
+        </section> : null}
+
         <section className="sp-study-stats" aria-label="Study progress"><div className="sp-study-stat"><strong>{completedInTrack}</strong><span>Classes completed</span></div><div className="sp-study-stat"><strong>{Math.max(0, pool.length - completedInTrack)}</strong><span>Classes remaining</span></div><div className="sp-study-stat"><strong>{completionPct}%</strong><span>Track progress</span></div><Link to="/plan" className="sp-study-stat sp-study-plan-status"><strong>{planSaved ? "✓" : "→"}</strong><span>{planSaved ? "Plan active" : "Build study plan"}</span></Link></section>
         {continueRow ? <section className="sp-study-continue"><div><p className="sp-kicker">Continue learning</p><h2>{done.length ? "Pick up where you left off" : "Start your first class"}</h2><p>Next suggested class: {continueRow.title} · D{continueRow.domain} · {labelForTrack(track)}</p></div><Link to="/learn/$id" params={{ id: String(continueRow.id) }} className="sp-btn sp-btn-primary">{done.length ? "Continue →" : "Start class →"}</Link></section> : null}
         <TrackPicker track={track} onChange={setTrack} />
