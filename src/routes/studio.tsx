@@ -6,6 +6,7 @@ import { CSP_DOMAIN_NAMES, CSP_DOMAIN_WEIGHTS, DOMAIN_SHORT } from "@/lib/safepa
 import { stillForClass } from "@/lib/safepath/media";
 import { readSession, type TrackId } from "@/lib/safepath/session";
 import { TrackPicker, labelForTrack } from "@/components/lesson/TrackPicker";
+import { hasSavedPlan, readPlan } from "@/lib/safepath/planner";
 
 export const Route = createFileRoute("/studio")({ component: Studio });
 const ALL_DOMAINS = [1, 2, 3, 4, 5, 6, 7] as const;
@@ -18,8 +19,17 @@ function Studio() {
   const [flagged, setFlagged] = useState<number[]>([]);
   const [track, setTrack] = useState<TrackId>("recommended");
   const [showDone, setShowDone] = useState<StatusFilter>("all");
+  const [planSaved, setPlanSaved] = useState(false);
+  const [planSummary, setPlanSummary] = useState("Not created yet");
 
-  function refresh() { const session = readSession(); setDone(session.completed); setFlagged(session.flaggedClasses); setTrack(session.track); }
+  function refresh() {
+    const session = readSession();
+    const saved = hasSavedPlan();
+    const plan = readPlan();
+    setDone(session.completed); setFlagged(session.flaggedClasses); setTrack(session.track);
+    setPlanSaved(saved);
+    setPlanSummary(saved ? `${plan.domains.length} domains · ${plan.dailyHours} h/day · ${plan.mode === "domain" ? "domain blocks" : plan.mode === "choice" ? "your order" : plan.mode === "mix" ? "mixed" : "adaptive"}` : "Not created yet");
+  }
   useEffect(() => { refresh(); const onFocus = () => refresh(); window.addEventListener("focus", onFocus); return () => window.removeEventListener("focus", onFocus); }, []);
 
   const pool = catalogForTrack(track);
@@ -46,8 +56,14 @@ function Studio() {
   return (
     <Shell>
       <div className="sp-study-page space-y-7">
-        <section className="sp-study-hero"><div><p className="sp-kicker">Learning workspace</p><h1>Study with a plan, not a list.</h1><p>Choose your track, focus one or more domains, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p></div><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, task, or title" className="sp-field sp-study-search" aria-label="Search classes" /></section>
-        <section className="sp-study-stats" aria-label="Study progress"><div className="sp-study-stat"><strong>{completedInTrack}</strong><span>Classes completed</span></div><div className="sp-study-stat"><strong>{Math.max(0, pool.length - completedInTrack)}</strong><span>Classes remaining</span></div><div className="sp-study-stat"><strong>{completionPct}%</strong><span>Track progress</span></div></section>
+        <section className="sp-study-hero">
+          <div><p className="sp-kicker">Learning workspace</p><h1>Study with a plan, not a list.</h1><p>Choose your track, focus one or more domains, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p></div>
+          <div className="sp-study-hero-actions">
+            <Link to="/plan" className={`sp-study-plan-cta ${planSaved ? "is-ready" : ""}`}><span className="sp-study-plan-icon">{planSaved ? "✓" : "⌘"}</span><span><b>{planSaved ? "Study plan ready" : "Build study plan"}</b><small>{planSaved ? planSummary : "Set your date, method & domain order"}</small></span><strong>→</strong></Link>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, task, or title" className="sp-field sp-study-search" aria-label="Search classes" />
+          </div>
+        </section>
+        <section className="sp-study-stats" aria-label="Study progress"><div className="sp-study-stat"><strong>{completedInTrack}</strong><span>Classes completed</span></div><div className="sp-study-stat"><strong>{Math.max(0, pool.length - completedInTrack)}</strong><span>Classes remaining</span></div><div className="sp-study-stat"><strong>{completionPct}%</strong><span>Track progress</span></div><Link to="/plan" className="sp-study-stat sp-study-plan-status"><strong>{planSaved ? "✓" : "→"}</strong><span>{planSaved ? "Plan active" : "Build study plan"}</span></Link></section>
         {continueRow ? <section className="sp-study-continue"><div><p className="sp-kicker">Continue learning</p><h2>{done.length ? "Pick up where you left off" : "Start your first class"}</h2><p>Next suggested class: {continueRow.title} · D{continueRow.domain} · {labelForTrack(track)}</p></div><Link to="/learn/$id" params={{ id: String(continueRow.id) }} className="sp-btn sp-btn-primary">{done.length ? "Continue →" : "Start class →"}</Link></section> : null}
         <TrackPicker track={track} onChange={setTrack} />
         <section className="space-y-3">
