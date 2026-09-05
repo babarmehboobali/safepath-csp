@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clip } from "@/components/lesson/Clip";
 import { Shell } from "@/components/lesson/Shell";
+import { CATALOG } from "@/lib/safepath/catalog";
 import { CSP_DOMAIN_NAMES, CSP_DOMAIN_WEIGHTS, DOMAIN_SHORT } from "@/lib/safepath/domains";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -20,7 +21,7 @@ const MORE = [
 ] as const;
 
 const GET = [
-  { title: "130 visual classes", body: "Compact 47, Recommended 78, or Maximum 130. Every class has a field picture, a decision rule, and a drill." },
+  { title: "132 visual classes", body: "Compact 47, Recommended 78, or Maximum 132. Every class has a field picture, a decision rule, and a drill." },
   { title: "Self-assessment", body: "50 or 100 blueprint-weighted items, then a seven-domain readiness report." },
   { title: "Mock exam", body: "50 / 100 / 200 CBT sittings. One item, flag, review, calculator. Clock does not pause." },
   { title: "Honest study", body: "Independent of BCSP and Pearson VUE. No pass guarantee. The desks are here. The hours are yours." },
@@ -46,23 +47,21 @@ const DESKS = [
   { to: "/challenge", title: "Challenge", line: "Expert items only." },
   { to: "/dashboard", title: "Dashboard", line: "Seat, streak, next class, misses." },
   { to: "/drill", title: "Domain drill", line: "Eight items from one domain." },
-  { to: "/domains", title: "Domains", line: "Seven CSP-11 weights and class counts." },
   { to: "/learn", title: "Learn index", line: "Open any class from a grid." },
   { to: "/sessions", title: "Sessions", line: "Every stored sitting." },
   { to: "/register", title: "Register", line: "Create a seat. Agreement required." },
   { to: "/formulas", title: "Formula desk", line: "Named expressions and pitfalls." },
   { to: "/math", title: "Math desk", line: "TRIR, TWA, and Q=VA solvers." },
-  { to: "/studio", title: "Learning", line: "Learning studio. 130 visual classes." },
+  { to: "/studio", title: "Learning", line: "Learning studio. 132 visual classes." },
   { to: "/library", title: "Study library", line: "Core plus deep labs." },
   { to: "/topics", title: "Topic map", line: "Every class under its domain." },
-  { to: "/blueprint", title: "Blueprint", line: "Seven domains. Public weights." },
   { to: "/calculator", title: "Calculator", line: "DEG pad. Not Pearson software." },
   { to: "/ergo", title: "Ergonomics lab", line: "Teaching posture score, then the control." },
   { to: "/tox", title: "Toxicology lab", line: "PEL / TLV / TWA contrasts plus items." },
   { to: "/exam-day", title: "Exam day", line: "Clock, whiteboard, closest value." },
   { to: "/eligibility", title: "Eligibility", line: "Planning screen, not a ruling." },
   { to: "/certificate", title: "Certificate", line: "Study record, not a credential." },
-  { to: "/flags", title: "Sittings log", line: "Scores stored on this device." },
+  { to: "/flags", title: "Review focus", line: "Flagged topics for focused review." },
   { to: "/onboarding", title: "Onboarding", line: "Track and field skin." },
   { to: "/about", title: "Honest study", line: "Independent. No pass promise." },
 ] as const;
@@ -95,19 +94,36 @@ function Home() {
           </div>
         </section>
 
-        <section className="sp-wrap space-y-4">
-          <div>
-            <p className="sp-kicker">Domain signs</p>
-            <h2 className="sp-title mt-2 text-3xl">Seven zones. Tap a sign.</h2>
+        <section className="sp-wrap space-y-5">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="sp-kicker">Domain signs</p>
+              <h2 className="sp-title mt-2 text-3xl sm:text-4xl">Seven domains. Seven study rooms.</h2>
+              <p className="mt-2 max-w-2xl text-sm text-fg-muted">Select a domain to see its published CSP-11 scope, the SafePath class map, and the skills worth drilling.</p>
+            </div>
+            <Link to="/blueprint" className="sp-btn sp-btn-ghost">View CSP-11 blueprint</Link>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {([1, 2, 3, 4, 5, 6, 7] as const).map((d) => (
-              <Link key={d} to="/studio" className="game-sign p-4 no-underline">
-                <p className="font-mono text-xs tracking-[0.16em] text-[#f0d24a]">D{d} · {CSP_DOMAIN_WEIGHTS[d]}%</p>
-                <p className="mt-2 font-serif text-xl">{DOMAIN_SHORT[d]}</p>
-                <p className="mt-1 text-sm text-[#d7e6d4]">{CSP_DOMAIN_NAMES[d]}</p>
-              </Link>
-            ))}
+          <div className="sp-domain-home-grid">
+            {([1, 2, 3, 4, 5, 6, 7] as const).map((d) => {
+              const count = CATALOG.filter((row) => row.domain === d).length;
+              return (
+                <Link key={d} to="/domains/$domain" params={{ domain: String(d) }} className={`sp-domain-home-card sp-domain-home-${d} no-underline`}>
+                  <div className="sp-domain-home-top">
+                    <span className="sp-domain-home-icon" aria-hidden="true">{["◆", "▦", "◇", "✦", "♻", "◉", "◎"][d - 1]}</span>
+                    <span>D{d}</span>
+                    <span>{CSP_DOMAIN_WEIGHTS[d]}%</span>
+                  </div>
+                  <div className="sp-domain-home-copy">
+                    <strong>{DOMAIN_SHORT[d]}</strong>
+                    <span>{CSP_DOMAIN_NAMES[d]}</span>
+                  </div>
+                  <div className="sp-domain-home-footer">
+                    <span>{count} SafePath classes</span>
+                    <span>Explore domain →</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
 
@@ -150,7 +166,7 @@ function Home() {
 
         <section id="desks" className="sp-wrap scroll-mt-24 space-y-6">
           <div>
-            <p className="sp-kicker">All desks</p>
+            <p className="sp-kicker">Study tools</p>
             <h2 className="sp-title mt-2 text-3xl sm:text-4xl">Self-assessment, mock exam, and the rest of the stack.</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -165,7 +181,7 @@ function Home() {
 
         <section className="sp-wrap grid gap-3 sm:grid-cols-3">
           {[
-            ["130", "classes across seven domains"],
+            ["132", "classes across seven domains"],
             ["200", "item full mock in CBT chrome"],
             ["7", "domain scores on every diagnostic"],
           ].map(([stat, label]) => (
@@ -213,7 +229,7 @@ function Home() {
               <p className="sp-kicker">Open a picture</p>
               <h2 className="sp-title mt-2 text-3xl sm:text-4xl">Start with a control you can see.</h2>
             </div>
-            <Link to="/studio" className="sp-btn sp-btn-ghost">All 130 classes</Link>
+            <Link to="/studio" className="sp-btn sp-btn-ghost">All 132 classes</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {FEATURED.map((row) => (
@@ -250,30 +266,12 @@ function Home() {
           </div>
         </section>
 
-        <section id="blueprint" className="sp-wrap scroll-mt-24 space-y-6">
-          <div>
-            <p className="sp-kicker">CSP-11 blueprint</p>
-            <h2 className="sp-title mt-2 text-3xl sm:text-4xl">Seven domains. Public weights.</h2>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {([1, 2, 3, 4, 5, 6, 7] as const).map((d) => (
-              <Link key={d} to="/blueprint" className="sp-card p-4 text-inherit no-underline">
-                <p className="font-mono text-xs text-accent">
-                  D{d} · {CSP_DOMAIN_WEIGHTS[d]}%
-                </p>
-                <p className="mt-2 font-medium">{DOMAIN_SHORT[d]}</p>
-                <p className="mt-1 text-sm text-fg-muted">{CSP_DOMAIN_NAMES[d]}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
-
         <section id="tracks" className="sp-wrap scroll-mt-24">
           <div className="sp-card grid gap-0 overflow-hidden lg:grid-cols-3">
             {[
               ["Compact", "47 classes", "Core applied safety and the first pass through each domain."],
               ["Recommended", "78 classes", "Full core catalog before maximum labs and deep engineering."],
-              ["Maximum", "130 classes", "Deep labs: hierarchy discrimination, LOTO mastery, fire hydraulics, RNLE."],
+              ["Maximum", "132 classes", "Deep labs: hierarchy discrimination, LOTO mastery, fire hydraulics, RNLE."],
             ].map(([name, count, body]) => (
               <div key={name} className="border-b border-border p-6 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0">
                 <p className="sp-kicker">{name}</p>
