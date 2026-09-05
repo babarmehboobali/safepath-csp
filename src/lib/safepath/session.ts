@@ -6,15 +6,15 @@ export type TrackId = "compact" | "recommended" | "maximum";
 export type IndustryId = "general" | "oil" | "build";
 export type ExamRecord = { at: number; score: number; total: number; kind?: "mock" | "assess" | "practice"; pct?: number };
 export type LessonRecord = { slides: string[]; drillScore: number; drillTotal: number; at: number };
-export type StudioSession = { email: string; name: string; agreed: boolean; completed: number[]; track: TrackId; industry: IndustryId; exams: ExamRecord[]; studyDates: string[]; knownCards: number[]; missed: number[]; lessons: Record<number, LessonRecord> };
-function empty(): StudioSession { return { email: "", name: "", agreed: false, completed: [], track: "recommended", industry: "general", exams: [], studyDates: [], knownCards: [], missed: [], lessons: {} }; }
+export type StudioSession = { email: string; name: string; agreed: boolean; completed: number[]; track: TrackId; industry: IndustryId; exams: ExamRecord[]; studyDates: string[]; knownCards: number[]; missed: number[]; lessons: Record<number, LessonRecord>; flaggedClasses: number[] };
+function empty(): StudioSession { return { email: "", name: "", agreed: false, completed: [], track: "recommended", industry: "general", exams: [], studyDates: [], knownCards: [], missed: [], lessons: {}, flaggedClasses: [] }; }
 function dayKey(d = new Date()) { return d.toISOString().slice(0, 10); }
 export function readSession(): StudioSession {
   if (typeof window === "undefined") return empty();
   try {
     const raw = persistGet(KEY) || persistGet(KEY_STABLE); if (!raw) return empty();
     const parsed = JSON.parse(raw) as Partial<StudioSession>;
-    return { email: String(parsed.email || ""), name: String(parsed.name || ""), agreed: Boolean(parsed.agreed), completed: Array.isArray(parsed.completed) ? parsed.completed.map(Number) : [], track: parsed.track === "compact" || parsed.track === "maximum" ? parsed.track : "recommended", industry: parsed.industry === "oil" || parsed.industry === "build" ? parsed.industry : "general", exams: Array.isArray(parsed.exams) ? parsed.exams.map((row) => ({ at: Number(row.at) || Date.now(), score: Number(row.score) || 0, total: Number(row.total) || 0, kind: row.kind, pct: row.pct })) : [], studyDates: Array.isArray(parsed.studyDates) ? parsed.studyDates.map(String) : [], knownCards: Array.isArray(parsed.knownCards) ? parsed.knownCards.map(Number) : [], missed: Array.isArray(parsed.missed) ? parsed.missed.map(Number) : [], lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons as Record<number, LessonRecord> : {} };
+    return { email: String(parsed.email || ""), name: String(parsed.name || ""), agreed: Boolean(parsed.agreed), completed: Array.isArray(parsed.completed) ? parsed.completed.map(Number) : [], track: parsed.track === "compact" || parsed.track === "maximum" ? parsed.track : "recommended", industry: parsed.industry === "oil" || parsed.industry === "build" ? parsed.industry : "general", exams: Array.isArray(parsed.exams) ? parsed.exams.map((row) => ({ at: Number(row.at) || Date.now(), score: Number(row.score) || 0, total: Number(row.total) || 0, kind: row.kind, pct: row.pct })) : [], studyDates: Array.isArray(parsed.studyDates) ? parsed.studyDates.map(String) : [], knownCards: Array.isArray(parsed.knownCards) ? parsed.knownCards.map(Number) : [], missed: Array.isArray(parsed.missed) ? parsed.missed.map(Number) : [], lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons as Record<number, LessonRecord> : {}, flaggedClasses: Array.isArray(parsed.flaggedClasses) ? Array.from(new Set(parsed.flaggedClasses.map(Number).filter((id) => Number.isFinite(id) && id > 0))) : [] };
   } catch { return empty(); }
 }
 
@@ -31,7 +31,7 @@ export async function hydrateSession() {
     const { cloudLoadProgress } = await import("./seats-api");
     const remote = await cloudLoadProgress({ data: {} });
     if (remote && typeof remote === "object") {
-      const merged: StudioSession = { ...local, ...remote, email: String(remote.email || local.email), name: String(remote.name || local.name), completed: Array.from(new Set([...(remote.completed || []), ...local.completed])), exams: [...(remote.exams || []), ...local.exams].slice(0, 16), studyDates: Array.from(new Set([...(remote.studyDates || []), ...local.studyDates])), knownCards: Array.from(new Set([...(remote.knownCards || []), ...local.knownCards])), missed: Array.from(new Set([...(remote.missed || []), ...local.missed])).slice(0, 80), lessons: { ...(remote.lessons || {}), ...local.lessons }, agreed: Boolean(remote.agreed || local.agreed) };
+      const merged: StudioSession = { ...local, ...remote, email: String(remote.email || local.email), name: String(remote.name || local.name), completed: Array.from(new Set([...(remote.completed || []), ...local.completed])), exams: [...(remote.exams || []), ...local.exams].slice(0, 16), studyDates: Array.from(new Set([...(remote.studyDates || []), ...local.studyDates])), knownCards: Array.from(new Set([...(remote.knownCards || []), ...local.knownCards])), missed: Array.from(new Set([...(remote.missed || []), ...local.missed])).slice(0, 80), lessons: { ...(remote.lessons || {}), ...local.lessons }, agreed: Boolean(remote.agreed || local.agreed), flaggedClasses: Array.from(new Set([...(remote.flaggedClasses || []), ...local.flaggedClasses])).slice(0, 132) };
       persistSet(KEY, JSON.stringify(merged)); persistSet(KEY_STABLE, JSON.stringify(merged)); return merged;
     }
   } catch { /* local cache remains usable while signed out/offline */ }
@@ -46,4 +46,6 @@ export function markComplete(classId: number) { const s = markStudy(); if (!s.co
 export function recordExam(score: number, total: number, kind: ExamRecord["kind"] = "practice") { const s = markStudy(); s.exams = [{ at: Date.now(), score, total, kind, pct: total ? Math.round((score / total) * 100) : 0 }, ...s.exams].slice(0, 16); writeSession(s); return s; }
 export function recordMissed(classIds: number[]) { const s = markStudy(); const set = new Set(s.missed); classIds.forEach((id) => set.add(id)); s.missed = Array.from(set).slice(0, 80); writeSession(s); return s; }
 export function markCardKnown(classId: number) { const s = markStudy(); if (!s.knownCards.includes(classId)) s.knownCards.push(classId); writeSession(s); return s; }
+export function toggleFlaggedClass(classId: number) { const s = readSession(); const set = new Set(s.flaggedClasses); if (set.has(classId)) set.delete(classId); else set.add(classId); s.flaggedClasses = Array.from(set).sort((a, b) => a - b); writeSession(s); return s; }
+export function isClassFlagged(classId: number) { return readSession().flaggedClasses.includes(classId); }
 export function signOut() { const keep = readSession(); persistSet(KEY, JSON.stringify({ ...keep, email: "" })); persistSet(KEY_STABLE, JSON.stringify({ ...keep, email: "" })); forgottenEmail(); }
