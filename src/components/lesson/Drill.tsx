@@ -1,18 +1,94 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ClassItem } from "@/content/classes/types";
+import { getLessonQuestions } from "@/lib/safepath/lesson-questions.server";
+
+type DrillMode = "core" | "mastery" | "full";
+
+type DrillRow = {
+  id?: string;
+  classId: number;
+  item: ClassItem;
+};
+
+function shuffle<T>(rows: T[]): T[] {
+  const next = [...rows];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j]!, next[i]!];
+  }
+  return next;
+}
 
 export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: number, total: number) => void }) {
-  const pool = useMemo(() => items.slice(0, 8), [items]);
+  const fallbackRows = useMemo<DrillRow[]>(
+    () => items.map((item, index) => ({ id: `local-${index}`, classId: 0, item })),
+    [items],
+  );
+  const [bank, setBank] = useState<DrillRow[]>(fallbackRows);
+  const [loadingBank, setLoadingBank] = useState(true);
+  const [bankError, setBankError] = useState(false);
+  const [mode, setMode] = useState<DrillMode>("mastery");
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState<number[]>([]);
-  const item = pool[index];
-  if (!item) return <div className="sp-drill-empty"><span>✓</span><p>No drill items in this class yet.</p></div>;
+
+  useEffect(() => {
+    let live = true;
+    const classId = items[0]?.taskCode ? Number.NaN : Number.NaN;
+    void classId;
+    setLoadingBank(true);
+    setBankError(false);
+
+    // The class id is supplied through the lesson item wrapper below. The
+    // fallback items remain usable if Neon is temporarily unavailable.
+    const pathId = typeof window !== "undefined" ? Number(window.location.pathname.split("/").pop()) : NaN;
+    if (!Number.isInteger(pathId) || pathId < 1) {
+      setLoadingBank(false);
+      return () => { live = false; };
+    }
+
+    getLessonQuestions({ data: { classId: pathId } })
+      .then((rows) => {
+        if (!live) return;
+        if (rows.length) setBank(shuffle(rows));
+        else setBank(fallbackRows);
+      })
+      .catch(() => {
+        if (!live) return;
+        setBankError(true);
+        setBank(fallbackRows);
+      })
+      .finally(() => {
+        if (live) setLoadingBank(false);
+      });
+
+    return () => {
+      live = false;
+    };
+  }, [fallbackRows, items]);
+
+  const pool = useMemo(() => {
+    const limit = mode === "core" ? 8 : mode === "mastery" ? 15 : bank.length;
+    return bank.slice(0, Math.min(limit, bank.length));
+  }, [bank, mode]);
+
+  useEffect(() => {
+    setIndex(0);
+    setPicked(null);
+    setScore(0);
+    setAnswered([]);
+  }, [mode]);
+
+  const row = pool[index];
+  if (!row) return <div className="sp-drill-empty"><span>✓</span><p>{loadingBank ? "Loading this lesson's matched question bank…" : "No drill items in this class yet."}</p></div>;
+
+  const item = row.item;
   const correct = picked !== null && picked === item.answerIndex;
   const answeredCount = answered.length + (picked !== null && !answered.includes(index) ? 1 : 0);
   const liveScore = score + (picked === item.answerIndex && !answered.includes(index) ? 1 : 0);
   const progress = pool.length ? Math.round(((index + (picked !== null ? 1 : 0)) / pool.length) * 100) : 0;
+  const remaining = Math.max(0, bank.length - pool.length);
 
   function choose(i: number) {
     if (picked !== null || !item) return;
@@ -35,15 +111,52 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
     setIndex((n) => n - 1);
   }
 
+  function selectMode(next: DrillMode) {
+    setMode(next);
+  }
+
   return (
     <div className="sp-drill-shell">
       <div className="sp-drill-progress-head">
-        <div><span className="sp-drill-eyebrow">Applied scenario</span><strong>Question {index + 1}<small> of {pool.length}</small></strong></div>
+        <div><span className="sp-drill-eyebrow">Lesson-matched question bank</span><strong>Question {index + 1}<small> of {pool.length}</small></strong></div>
         <div className="sp-drill-score"><span>Score</span><b>{liveScore}/{answeredCount || 0}</b><em>{answeredCount ? `${Math.round((liveScore / answeredCount) * 100)}%` : "Ready"}</em></div>
       </div>
       <div className="sp-drill-progress"><span style={{ width: `${progress}%` }} /></div>
 
-      <div className="sp-drill-meta"><span>{item.difficultyLevel ?? item.difficulty}</span>{item.taskCode ? <span>{item.taskCode}</span> : null}</div>
+      <div className="mb-4 rounded-xl border border-border bg-bg p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg-subtle">Practice depth</p>
+            <p className="mt-1 text-sm text-fg-muted">
+              {loadingBank ? "Checking Neon for every question mapped to this lesson…" : `${bank.length} questions are mapped to this lesson.`}
+              {bankError ? " Using the local lesson pack while the bank reconnects." : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Practice depth">
+            {(["core", "mastery", "full"] as const).map((option) => {
+              const label = option === "core" ? "Core 8" : option === "mastery" ? `Mastery ${Math.min(15, bank.length)}` : `Full bank ${bank.length}`;
+              const active = mode === option;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  className={`sp-btn ${active ? "sp-btn-primary" : "sp-btn-ghost"}`}
+                  onClick={() => selectMode(option)}
+                  aria-pressed={active}
+                  disabled={option === "full" && bank.length <= 8}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {mode !== "full" && bank.length > pool.length ? (
+          <p className="mt-2 text-xs text-fg-subtle">{remaining} additional matched questions remain. Choose <strong>Full bank</strong> to work through every question for this lesson.</p>
+        ) : null}
+      </div>
+
+      <div className="sp-drill-meta"><span>{item.difficultyLevel ?? item.difficulty}</span><span>Matched to this lesson</span></div>
       {item.scenarioText ? <div className="sp-drill-scenario"><span>SCENARIO</span><p>{item.scenarioText}</p></div> : null}
       <h3 className="sp-drill-question">{item.stem}</h3>
       {item.standardReference ? <p className="sp-drill-reference">{item.standardReference}</p> : null}
@@ -55,7 +168,7 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
           const isPicked = picked === i;
           const state = !shown ? "" : isAnswer ? "is-correct" : isPicked ? "is-wrong" : "is-muted";
           return (
-            <button key={`${item.taskCode}-${i}`} type="button" className={`sp-drill-option ${state}`} onClick={() => choose(i)} disabled={shown} aria-pressed={isPicked}>
+            <button key={`${row.id ?? row.classId}-${i}`} type="button" className={`sp-drill-option ${state}`} onClick={() => choose(i)} disabled={shown} aria-pressed={isPicked}>
               <span className="sp-drill-option-letter">{String.fromCharCode(65 + i)}</span>
               <span className="sp-drill-option-copy"><span>{option}</span>{shown && isAnswer ? <small>Best answer</small> : null}{shown && isPicked && !isAnswer ? <small>Your choice</small> : null}</span>
               <span className="sp-drill-option-status" aria-hidden="true">{shown && isAnswer ? "✓" : shown && isPicked ? "×" : "→"}</span>
