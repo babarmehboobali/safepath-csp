@@ -1,5 +1,6 @@
 import { CLASS_PACKS } from "@/content/classes";
 import type { ClassItem } from "@/content/classes/types";
+import { extraBankItems } from "@/content/questions/csp-bank";
 import { catalogForTrack } from "@/lib/safepath/catalog";
 import { CSP_DOMAIN_WEIGHTS } from "@/lib/safepath/domains";
 import type { TrackId } from "@/lib/safepath/session";
@@ -32,8 +33,8 @@ export function bankForTrack(track: TrackId): BankItem[] {
       rows.push({ classId: row.id, title: row.title, domain: row.domain, item });
     }
   }
-  CACHE[track] = rows;
-  return rows;
+  CACHE[track] = rows.concat(extraBankItems());
+  return CACHE[track]!;
 }
 
 export function pickByDomain(count: number, domain: number, track: TrackId): BankItem[] {
