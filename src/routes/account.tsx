@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/lesson/Shell";
 import { readSession, signOut, writeSession, type IndustryId, type TrackId } from "@/lib/safepath/session";
@@ -26,6 +26,11 @@ function Account() {
           <p className="sp-kicker">Account</p>
           <h1 className="sp-title mt-2 text-4xl">Seat and plan.</h1>
         </div>
+        <Link to="/appearance" className="appearance-account-link">
+          <span className="appearance-account-icon">◐</span>
+          <span><strong>Website appearance</strong><small>Choose Modern, Classic, Dark, Ocean, Sunset, Purple, or High Contrast.</small></span>
+          <span className="ml-auto">→</span>
+        </Link>
         <form
           className="sp-card space-y-3 p-6"
           onSubmit={(e) => {
@@ -54,45 +59,18 @@ function Account() {
         <div className="sp-card space-y-3 p-6">
           <p className="font-medium">Track</p>
           <div className="flex flex-wrap gap-2">
-            {(["compact", "recommended", "maximum"] as TrackId[]).map((track) => (
-              <button
-                key={track}
-                type="button"
-                className={`sp-btn ${session.track === track ? "sp-btn-primary" : "sp-btn-ghost"}`}
-                onClick={() => save({ track })}
-              >
-                {track}
-              </button>
+            {["compact", "recommended", "maximum"].map((track) => (
+              <button key={track} type="button" className={`sp-btn ${session.track === track ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={() => save({ track: track as TrackId })}>{track}</button>
             ))}
           </div>
           <p className="pt-2 font-medium">Field skin</p>
           <div className="flex flex-wrap gap-2">
-            {([
-              ["general", "Field"],
-              ["oil", "Oil and gas"],
-              ["build", "Construction"],
-            ] as [IndustryId, string][]).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`sp-btn ${session.industry === id ? "sp-btn-primary" : "sp-btn-ghost"}`}
-                onClick={() => save({ industry: id })}
-              >
-                {label}
-              </button>
+            {[["general", "Field"], ["oil", "Oil and gas"], ["build", "Construction"]].map(([id, label]) => (
+              <button key={id} type="button" className={`sp-btn ${session.industry === id ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={() => save({ industry: id as IndustryId })}>{label}</button>
             ))}
           </div>
         </div>
-        <button
-          type="button"
-          className="sp-btn sp-btn-ghost"
-          onClick={() => {
-            signOut();
-            navigate({ to: "/" });
-          }}
-        >
-          Sign out
-        </button>
+        <button type="button" className="sp-btn sp-btn-ghost" onClick={() => { signOut(); navigate({ to: "/" }); }}>Sign out</button>
       </div>
     </Shell>
   );
