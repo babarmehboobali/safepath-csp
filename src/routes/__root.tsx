@@ -5,11 +5,11 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { CanonicalHost } from "@/components/CanonicalHost";
 import appCss from "../styles.css?url";
 import responsiveCss from "../responsive.css?url";
+import appearanceCss from "../appearance.css?url";
 
 const SITE = "https://safepath-csp.com";
 const TITLE = "SafePath CSP | CSP Exam Prep";
-const DESC =
-  "Independent CSP exam prep: visual lessons, self-assessment, and CBT-style mock exams across all seven CSP-11 domains. Start free.";
+const DESC = "Independent CSP exam prep: visual lessons, self-assessment, and CBT-style mock exams across all seven CSP-11 domains. Start free.";
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -51,6 +51,7 @@ export const Route = createRootRoute({
       { rel: "icon", type: "image/png", href: "/brand/logo-mark.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "stylesheet", href: responsiveCss },
+      { rel: "stylesheet", href: appearanceCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
