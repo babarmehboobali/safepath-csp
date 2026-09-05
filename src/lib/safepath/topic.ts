@@ -17,8 +17,11 @@ export function topicFor(entry: CatalogEntry, rule: string) {
   const short = DOMAIN_SHORT[entry.domain as keyof typeof DOMAIN_SHORT];
   const domainThesis = DOMAIN_THESIS[entry.domain] ?? "";
   const task = guideForTask(entry.taskCode);
+  const taskPlain = task?.plain ?? rule.split(/(?<=\.)\s+/)[0]?.trim() ?? rule;
+  const taskLabel = task?.label ?? entry.taskCode;
+  const learningTargets = task?.targets ?? [taskPlain];
   const thesis = task
-    ? `${domainThesis} ${task.plain}`
+    ? `${domainThesis} BCSP focus: ${taskLabel}. ${taskPlain} Key areas: ${learningTargets.join("; ")}.`
     : domainThesis;
   const first = rule.split(/(?<=\.)\s+/)[0]?.trim() ?? rule;
   return {
@@ -26,9 +29,9 @@ export function topicFor(entry: CatalogEntry, rule: string) {
     short,
     weight: CSP_DOMAIN_WEIGHTS[entry.domain as keyof typeof CSP_DOMAIN_WEIGHTS],
     thesis,
-    taskLabel: task?.label ?? entry.taskCode,
-    taskPlain: task?.plain ?? first,
-    learningTargets: task?.targets ?? [first],
+    taskLabel,
+    taskPlain,
+    learningTargets,
     sentence: `${entry.title} is a Domain ${entry.domain} (${short}) topic. ${first}`,
   };
 }
