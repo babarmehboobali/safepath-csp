@@ -46,8 +46,8 @@ function Account() {
             <input name="email" type="email" defaultValue={session.email} className="sp-field mt-1" />
           </label>
           <p className="text-sm text-fg-muted">
-            Agreement: {session.agreed ? "accepted" : "not yet accepted"}. Reset and login stay on this device until you
-            publish the live account layer.
+            Agreement: {session.agreed ? "accepted" : "not yet accepted"}. Your seat stays on this device across app
+            updates. Sign out does not delete the account.
           </p>
           <button type="submit" className="sp-btn sp-btn-primary">Save</button>
         </form>

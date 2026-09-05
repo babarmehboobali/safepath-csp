@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/lesson/Shell";
 import { loginAccount, registerAccount, resetAccount } from "@/lib/safepath/accounts";
-import { readSession, writeSession } from "@/lib/safepath/session";
+import { forgottenEmail, rememberedEmail } from "@/lib/safepath/persist";
+import { hydrateSession, readSession, writeSession } from "@/lib/safepath/session";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -22,6 +23,19 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<"login" | "register" | "reset">("login");
+  const [savedEmail, setSavedEmail] = useState("");
+  const [stay, setStay] = useState(true);
+
+  useEffect(() => {
+    void hydrateSession().then((s) => {
+      const email = s.email || rememberedEmail();
+      setSavedEmail(email);
+      if (s.agreed) setAgreed(true);
+      if (s.email) {
+        /* already signed in on this device */
+      }
+    });
+  }, []);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +68,7 @@ function Login() {
       }
       const row = await loginAccount(email, password);
       writeSession({ ...readSession(), email: row.email, name: row.name, agreed: true });
+      if (!stay) forgottenEmail();
       navigate({ to: "/today" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not continue.");
@@ -100,7 +115,7 @@ function Login() {
             ) : null}
             <label className="block text-sm">
               Email
-              <input name="email" type="email" required className="sp-field mt-1" autoComplete="email" placeholder="you@example.com" />
+              <input name="email" type="email" required className="sp-field mt-1" autoComplete="username" key={savedEmail} defaultValue={savedEmail} placeholder="you@example.com" />
             </label>
             <label className="block text-sm">
               <span className="mb-1 flex items-center justify-between">
@@ -120,6 +135,13 @@ function Login() {
               </label>
             ) : null}
             {error ? <p className="text-sm text-bad">{error}</p> : null}
+            <label className="flex items-center gap-3 text-sm text-fg">
+              <input type="checkbox" checked={stay} onChange={(e) => setStay(e.target.checked)} className="h-4 w-4 accent-accent" />
+              Stay signed in on this phone or computer
+            </label>
+            {savedEmail && mode === "login" ? (
+              <p className="text-xs text-fg-subtle">Last seat on this device: {savedEmail}. Use the same password — do not register again.</p>
+            ) : null}
             <button type="submit" className="sp-btn sp-btn-primary w-full" disabled={busy}>
               {busy ? "Working…" : mode === "reset" ? "Save new password" : mode === "register" ? "Create seat" : "Log in"}
             </button>

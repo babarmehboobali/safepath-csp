@@ -1,4 +1,7 @@
+import { persistGet, persistHydrate, persistSet } from "./persist";
+
 const KEY = "safepath.accounts.v1";
+const KEY_STABLE = "safepath.accounts";
 
 export type Account = {
   email: string;
@@ -7,17 +10,31 @@ export type Account = {
   created: number;
 };
 
-function readAll(): Record<string, Account> {
-  if (typeof window === "undefined") return {};
+function parseMap(raw: string | null): Record<string, Account> {
+  if (!raw) return {};
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "{}") as Record<string, Account>;
+    return JSON.parse(raw) as Record<string, Account>;
   } catch {
     return {};
   }
 }
 
+function readAll(): Record<string, Account> {
+  if (typeof window === "undefined") return {};
+  const a = parseMap(persistGet(KEY));
+  const b = parseMap(persistGet(KEY_STABLE));
+  return { ...b, ...a };
+}
+
 function writeAll(map: Record<string, Account>) {
-  localStorage.setItem(KEY, JSON.stringify(map));
+  const raw = JSON.stringify(map);
+  persistSet(KEY, raw);
+  persistSet(KEY_STABLE, raw);
+}
+
+export async function hydrateAccounts() {
+  const raw = (await persistHydrate(KEY)) || (await persistHydrate(KEY_STABLE));
+  if (raw && !persistGet(KEY)) persistSet(KEY, raw);
 }
 
 export async function hashPass(password: string) {
@@ -37,6 +54,7 @@ export async function registerAccount(name: string, email: string, password: str
   if (!name.trim()) throw new Error("Enter your name.");
   if (!key || !key.includes("@")) throw new Error("Enter a valid email.");
   if (password.length < 8) throw new Error("Password must be at least 8 characters.");
+  await hydrateAccounts();
   const map = readAll();
   if (map[key]) throw new Error("That email already has a seat. Log in.");
   map[key] = {
@@ -51,6 +69,7 @@ export async function registerAccount(name: string, email: string, password: str
 
 export async function loginAccount(email: string, password: string, name?: string) {
   const key = email.trim().toLowerCase();
+  await hydrateAccounts();
   const map = readAll();
   const row = map[key];
   if (!row) throw new Error("No seat for that email. Create one.");
@@ -65,6 +84,7 @@ export async function loginAccount(email: string, password: string, name?: strin
 
 export async function resetAccount(email: string, password: string) {
   const key = email.trim().toLowerCase();
+  await hydrateAccounts();
   const map = readAll();
   const row = map[key];
   if (!row) throw new Error("No seat for that email.");

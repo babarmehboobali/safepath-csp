@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { readSession } from "@/lib/safepath/session";
+import { hydrateSession, readSession } from "@/lib/safepath/session";
 
 const LINKS = [
   { to: "/today", label: "Today" },
@@ -20,9 +20,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const s = readSession();
-    setDone(s.completed.length);
-    setName(s.name);
+    void hydrateSession().then((s) => {
+      setDone(s.completed.length);
+      setName(s.name);
+    });
   }, []);
 
   const first = name.split(" ")[0];

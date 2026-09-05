@@ -1,4 +1,7 @@
+import { persistGet, persistHydrate, persistSet, rememberEmail, forgottenEmail } from "./persist";
+
 const KEY = "safepath.studio.v1";
+const KEY_STABLE = "safepath.studio";
 
 export type TrackId = "compact" | "recommended" | "maximum";
 export type IndustryId = "general" | "oil" | "build";
@@ -55,7 +58,7 @@ function dayKey(d = new Date()) {
 export function readSession(): StudioSession {
   if (typeof window === "undefined") return empty();
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = persistGet(KEY) || persistGet(KEY_STABLE);
     if (!raw) return empty();
     const parsed = JSON.parse(raw) as Partial<StudioSession>;
     return {
@@ -85,7 +88,16 @@ export function readSession(): StudioSession {
 }
 
 export function writeSession(next: StudioSession) {
-  localStorage.setItem(KEY, JSON.stringify(next));
+  const raw = JSON.stringify(next);
+  persistSet(KEY, raw);
+  persistSet(KEY_STABLE, raw);
+  if (next.email) rememberEmail(next.email);
+}
+
+export async function hydrateSession() {
+  const raw = (await persistHydrate(KEY)) || (await persistHydrate(KEY_STABLE));
+  if (raw && !persistGet(KEY)) persistSet(KEY, raw);
+  return readSession();
 }
 
 export function markStudy() {
@@ -165,5 +177,12 @@ export function markCardKnown(classId: number) {
 }
 
 export function signOut() {
-  writeSession(empty());
+  const keep = readSession();
+  writeSession({
+    ...keep,
+    email: "",
+    name: keep.name,
+    agreed: keep.agreed,
+  });
+  forgottenEmail();
 }
