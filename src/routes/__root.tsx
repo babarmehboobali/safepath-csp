@@ -19,7 +19,7 @@ const JSON_LD = {
   "@graph": [
     { "@type": "Organization", "@id": `${SITE}/#org`, name: "SafePath CSP", url: SITE, email: "suggestions@safepath-csp.com", logo: `${SITE}/brand/logo-mark.png`, description: "Independent Certified Safety Professional (CSP-11) study software. Not affiliated with BCSP or Pearson VUE." },
     { "@type": "WebSite", "@id": `${SITE}/#site`, url: SITE, name: "SafePath CSP", description: DESC, publisher: { "@id": `${SITE}/#org` }, inLanguage: "en-US" },
-    { "@type": "SoftwareApplication", "@id": `${SITE}/#app`, name: "SafePath CSP", applicationCategory: "EducationalApplication", operatingSystem: "Web", url: SITE, description: DESC, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@id": `${SITE}/#org` },
+    { "@type": "SoftwareApplication", "@id": `${SITE}/#app`, name: "SafePath CSP", applicationCategory: "EducationalApplication", operatingSystem: "Web", url: SITE, description: DESC, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, publisher: { "@id": `${SITE}/#org` } }
   ],
 };
 
