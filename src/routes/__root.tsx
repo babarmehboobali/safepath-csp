@@ -9,6 +9,7 @@ import appearanceCss from "../appearance.css?url";
 import polishCss from "../csp-green-polish.css?url";
 import uxCss from "../csp-green-ux.css?url";
 import themeColorsCss from "../study-theme-colors.css?url";
+import drillPolishCss from "../study-drill-polish.css?url";
 
 const SITE = "https://safepath-csp.com";
 const TITLE = "SafePath CSP | CSP Exam Prep";
@@ -58,6 +59,7 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: polishCss },
       { rel: "stylesheet", href: uxCss },
       { rel: "stylesheet", href: themeColorsCss },
+      { rel: "stylesheet", href: drillPolishCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
