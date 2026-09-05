@@ -3,8 +3,9 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 export const APPEARANCE_STORAGE_KEY = "safepath-appearance";
 
 export const APPEARANCE_STYLES = [
-  { id: "modern", label: "Modern", description: "Clean, professional, and easy to read", tone: "Recommended" },
-  { id: "classic", label: "Classic", description: "The current SafePath look", tone: "Current" },
+  { id: "professional", label: "Professional Light", description: "The clean CSP study layout from your reference", tone: "Recommended" },
+  { id: "modern", label: "Modern", description: "Clean, professional, and easy to read", tone: "Light" },
+  { id: "classic", label: "Classic", description: "The original SafePath look", tone: "Original" },
   { id: "dark", label: "Dark", description: "Dark mode for low-light study", tone: "Low light" },
   { id: "minimal", label: "Minimal", description: "Simple and distraction free", tone: "Focus" },
   { id: "ocean", label: "Ocean", description: "Cool blue modern style", tone: "Calm" },
@@ -26,15 +27,15 @@ function isAppearanceId(value: string | null): value is AppearanceId {
 
 function applyAppearance(id: AppearanceId) {
   document.documentElement.dataset.spTheme = id;
-  document.documentElement.style.colorScheme = id === "modern" || id === "minimal" || id === "ocean" || id === "sunset" || id === "purple" ? "light" : "dark";
+  document.documentElement.style.colorScheme = id === "professional" || id === "modern" || id === "minimal" || id === "ocean" || id === "sunset" || id === "purple" ? "light" : "dark";
 }
 
 export function AppearanceProvider({ children }: { children: React.ReactNode }) {
-  const [appearance, setAppearanceState] = useState<AppearanceId>("classic");
+  const [appearance, setAppearanceState] = useState<AppearanceId>("professional");
 
   useEffect(() => {
     const saved = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    const next = isAppearanceId(saved) ? saved : "classic";
+    const next = isAppearanceId(saved) ? saved : "professional";
     setAppearanceState(next);
     applyAppearance(next);
   }, []);
