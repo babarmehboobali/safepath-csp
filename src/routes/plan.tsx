@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/lesson/Shell";
 import { catalogForTrack, classCountForTrack } from "@/lib/safepath/catalog";
 import { CSP_DOMAIN_NAMES, CSP_DOMAIN_WEIGHTS, DOMAIN_SHORT } from "@/lib/safepath/domains";
-import { buildWeeks, daysBetween, defaultPlan, readPlan, writePlan, type PlannerMode, type StudyPlan } from "@/lib/safepath/planner";
+import { buildWeeks, daysBetween, defaultPlan, planDeadlineStatus, readPlan, writePlan, type PlannerMode, type StudyPlan } from "@/lib/safepath/planner";
 import { TrackPicker } from "@/components/lesson/TrackPicker";
 import { readSession, type TrackId } from "@/lib/safepath/session";
 
@@ -28,11 +28,15 @@ function Plan() {
   const days = daysBetween(plan.startDate, plan.examDate);
   const hoursBudget = Math.round(days * plan.dailyHours);
   const hoursNeeded = classCountForTrack(track) * 1.2;
+  const deadline = useMemo(() => planDeadlineStatus(plan, track, completed), [plan, track, completed]);
+  function formatDate(value: string) { return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }); }
   function toggleDomain(d: number) { const has = plan.domains.includes(d); const domains = has ? plan.domains.filter((x) => x !== d) : [...plan.domains, d]; save({ ...plan, domains: domains.length ? domains : [d] }); }
   function moveDomain(d: number, dir: -1 | 1) { const domains = [...plan.domains]; const i = domains.indexOf(d); const j = i + dir; if (i < 0 || j < 0 || j >= domains.length) return; [domains[i], domains[j]] = [domains[j]!, domains[i]!]; save({ ...plan, domains }); }
 
   return <Shell><div className="sp-wrap space-y-8">
-    <div className="plan-hero"><div><p className="sp-kicker">Study planner</p><h1 className="sp-title mt-2 text-4xl">Build your CSP study plan.</h1><p className="mt-3 max-w-2xl text-fg-muted">This is your planning workspace: choose your track, set your exam date, select the domains you need, arrange their order, and then follow the generated weekly map.</p></div><div className="plan-hero-badge"><span>PLAN</span><b>{days}</b><small>days to target</small></div></div>
+    <div className="plan-hero"><div><p className="sp-kicker">Study planner</p><h1 className="sp-title mt-2 text-4xl">Build your CSP study plan.</h1><p className="mt-3 max-w-2xl text-fg-muted">This is your planning workspace: choose your track, set your exam date, select the domains you need, arrange their order, and then follow the generated weekly map.</p></div><div className="plan-hero-badge"><span>PLAN</span><b>{deadline.daysRemaining}</b><small>days to target</small></div></div>
+
+    <section className={`sp-plan-health is-${deadline.status}`} aria-label="Study plan deadline health"><div className="sp-plan-health-main"><div><p className="sp-kicker">Deadline check</p><h2>{deadline.label}</h2><p>{deadline.detail}</p></div><div className="sp-plan-health-date"><b>{formatDate(plan.examDate)}</b><span>exam target</span></div></div><div className="sp-plan-health-track"><span style={{ width: `${deadline.actualPct}%` }} /></div><div className="sp-plan-health-stats"><span><b>{deadline.actualPct}%</b> completed</span><span><b>{deadline.expectedPct}%</b> expected today</span><span><b>{deadline.remainingClasses}</b> classes left</span><span><b>{deadline.requiredClassesPerDay.toFixed(1)}</b> / day needed</span><span><b>{formatDate(deadline.plannedFinishDate)}</b> generated finish</span></div>{deadline.status === "behind" || deadline.status === "plan-too-slow" ? <div className="sp-plan-health-alert">{deadline.status === "behind" ? `You are behind the pace needed for ${formatDate(plan.examDate)}. Increase your study pace or adjust the plan.` : `The generated map currently finishes after ${formatDate(plan.examDate)}. Increase study capacity or change the target.`}</div> : null}</section>
 
     <div className="plan-steps"><span className="is-active"><b>1</b> Choose track</span><span><b>2</b> Set schedule</span><span><b>3</b> Choose method</span><span><b>4</b> Arrange domains</span><span><b>5</b> Follow map</span></div>
 
@@ -41,7 +45,7 @@ function Plan() {
     <section><div className="plan-section-title"><div><p className="sp-kicker">Step 2</p><h2 className="sp-title mt-2 text-2xl">Set your schedule</h2></div><span>When + how much</span></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <label className="sp-card p-4 text-sm"><p className="text-fg-subtle">Course start</p><input type="date" className="sp-field mt-2" value={plan.startDate} onChange={(e) => save({ ...plan, startDate: e.target.value })} /></label>
       <label className="sp-card p-4 text-sm"><p className="text-fg-subtle">Exam target</p><input type="date" className="sp-field mt-2" value={plan.examDate} onChange={(e) => save({ ...plan, examDate: e.target.value })} /></label>
-      <article className="sp-card p-4"><p className="text-sm text-fg-subtle">Days remaining</p><p className="mt-2 font-serif text-3xl">{days}</p></article>
+      <article className="sp-card p-4"><p className="text-sm text-fg-subtle">Days remaining</p><p className="mt-2 font-serif text-3xl">{deadline.daysRemaining}</p></article>
       <label className="sp-card p-4 text-sm"><p className="text-fg-subtle">Daily study hours</p><input type="number" min={0.5} max={8} step={0.5} className="sp-field mt-2" value={plan.dailyHours} onChange={(e) => save({ ...plan, dailyHours: Number(e.target.value) || 1 })} /></label>
     </div></section>
 
