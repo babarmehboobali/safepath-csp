@@ -1,0 +1,137 @@
+/* SafePath CSP responsive layout hardening */
+
+*, *::before, *::after { min-width: 0; }
+
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
+button, input, textarea, select { max-width: 100%; }
+
+pre, code { max-width: 100%; }
+pre { overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+table { max-width: 100%; }
+
+/* Prevent long labels, IDs, formulas and URLs from widening a page. */
+h1, h2, h3, h4, h5, h6, p, li, td, th, label, a, button, span {
+  overflow-wrap: anywhere;
+}
+
+/* Main application containers should always be viewport-safe. */
+.sp-shell, .sp-shell > *, .sp-shell main, main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sp-wrap {
+  width: min(1120px, calc(100% - 32px));
+}
+
+/* Common flex/grid children must be allowed to shrink. */
+.flex, [class*="flex"], [class*="grid"] { min-width: 0; }
+
+@media (max-width: 900px) {
+  .sp-wrap { width: min(100% - 24px, 1120px); }
+
+  /* Collapse multi-column Tailwind grids to a readable single column. */
+  [class*="grid-cols-2"],
+  [class*="grid-cols-3"],
+  [class*="grid-cols-4"],
+  [class*="grid-cols-5"],
+  [class*="grid-cols-6"],
+  [class*="grid-cols-7"],
+  [class*="grid-cols-8"],
+  [class*="grid-cols-9"],
+  [class*="grid-cols-10"],
+  [class*="grid-cols-11"],
+  [class*="grid-cols-12"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Keep dense dashboard rows from forcing horizontal scrolling. */
+  [class*="min-w-"] { min-width: 0 !important; }
+
+  .exam-intro, .exam-main {
+    width: 100%;
+    padding: 24px 16px;
+  }
+
+  .exam-header-inner {
+    padding: 10px 14px;
+    gap: 8px 12px;
+  }
+
+  .exam-header-btn-end { margin-left: 0; }
+
+  .exam-nav {
+    border-right: 0;
+    border-bottom: 1px solid #dadce0;
+  }
+
+  .exam-nav-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+
+  .sp-wrap { width: calc(100% - 20px); }
+
+  .sp-card { border-radius: 14px; }
+
+  /* Header/navigation rows become vertically flexible instead of overflowing. */
+  header, nav {
+    min-width: 0;
+  }
+
+  header [class*="flex"],
+  nav [class*="flex"] {
+    flex-wrap: wrap;
+  }
+
+  /* Full-width controls on narrow screens. */
+  .sp-btn { max-width: 100%; }
+
+  .exam-header-inner { align-items: flex-start; }
+  .exam-brand { flex: 1 1 100%; }
+  .exam-meta, .exam-clock { flex: 1 1 auto; }
+
+  .exam-nav-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+  .exam-mark-bar, .exam-footer, .exam-intro-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exam-mark-bar > *, .exam-footer > *, .exam-intro-actions > * {
+    width: 100%;
+  }
+
+  .exam-option { gap: 9px; padding: 10px; }
+  .exam-stem { font-size: 16px; }
+
+  .exam-ref-drawer { top: 0; width: 100%; }
+
+  .game-stage { padding: 12px; border-radius: 16px; }
+}
+
+@media (max-width: 420px) {
+  .sp-wrap { width: calc(100% - 16px); }
+
+  .exam-intro, .exam-main { padding: 18px 12px; }
+  .exam-nav { padding: 10px; }
+  .exam-nav-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+  .exam-nav-cell { min-height: 30px; }
+
+  .game-tile-back, .game-tile-face { min-height: 7rem; }
+}
+
+/* Tables and code blocks remain scrollable inside their page rather than widening it. */
+.sp-shell table, main table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Prevent fixed-width utility content from exceeding the viewport. */
+[class*="w-["], [class*="min-w-["], [class*="max-w-["] {
+  max-width: 100%;
+}
