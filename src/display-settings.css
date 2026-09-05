@@ -1,0 +1,44 @@
+.sp-settings-trigger { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 11px; border:1px solid var(--border-color,#dce5df); border-radius:10px; background:var(--bg,#fff); color:var(--fg,#183047); font:600 12px/1 'IBM Plex Sans',sans-serif; cursor:pointer; box-shadow:0 2px 7px rgba(10,30,20,.05); }
+.sp-settings-trigger:hover { border-color:var(--sp-user-accent,#0b7a43); color:var(--sp-user-accent,#0b7a43); }
+.sp-settings-backdrop { position:fixed; inset:0; z-index:100; display:flex; justify-content:flex-end; background:rgba(5,18,12,.42); backdrop-filter:blur(3px); }
+.sp-settings-panel { width:min(430px,100vw); height:100%; display:flex; flex-direction:column; background:#fff; color:#183047; box-shadow:-18px 0 45px rgba(0,0,0,.18); }
+.sp-settings-head { display:flex; gap:18px; justify-content:space-between; padding:25px 24px 20px; border-bottom:1px solid #dce5df; }
+.sp-settings-head h2 { margin:5px 0 5px; font:600 26px/1.15 Georgia,serif; color:#102640; }
+.sp-settings-head p:last-child { margin:0; max-width:330px; color:#687d91; font-size:12px; line-height:1.5; }
+.sp-settings-close { flex:0 0 auto; width:34px; height:34px; border:1px solid #dce5df; border-radius:9px; background:#fff; color:#536b82; font-size:23px; line-height:1; cursor:pointer; }
+.sp-settings-scroll { flex:1; overflow:auto; padding:20px 24px 28px; }
+.sp-settings-scroll section { padding:18px 0; border-bottom:1px solid #edf1ef; }
+.sp-settings-scroll section:first-child { padding-top:0; }
+.sp-settings-scroll h3 { margin:0 0 10px; color:#183047; font-size:14px; font-weight:700; }
+.sp-settings-help { margin:-3px 0 10px; color:#718398; font-size:11px; line-height:1.45; }
+.sp-settings-theme-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.sp-settings-choice { display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:11px; border:1px solid #dce5df; border-radius:11px; background:#fff; text-align:left; cursor:pointer; }
+.sp-settings-choice span { color:#183047; font-size:12px; font-weight:600; }
+.sp-settings-choice small { color:#8191a1; font-size:10px; }
+.sp-settings-choice.is-selected { border-color:var(--sp-user-accent,#0b7a43); background:var(--sp-user-accent-pale,#f1f8f4); box-shadow:inset 0 0 0 1px var(--sp-user-accent,#0b7a43); }
+.sp-settings-color-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+.sp-settings-color { display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 4px; border:1px solid #dce5df; border-radius:9px; background:#fff; color:#536b82; font-size:9px; cursor:pointer; }
+.sp-settings-color i { width:24px; height:24px; border-radius:50%; box-shadow:0 0 0 2px #fff,0 0 0 3px #dce5df; }
+.sp-settings-color.is-selected { border-color:var(--sp-user-accent,#0b7a43); background:var(--sp-user-accent-pale,#f1f8f4); }
+.sp-settings-color.is-selected i { box-shadow:0 0 0 2px #fff,0 0 0 3px var(--sp-user-accent,#0b7a43); }
+.sp-settings-segment { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+.sp-settings-segment button { min-height:38px; padding:7px; border:1px solid #dce5df; border-radius:8px; background:#fff; color:#5d7288; font-size:11px; cursor:pointer; }
+.sp-settings-segment button.is-selected { border-color:var(--sp-user-accent,#0b7a43); background:var(--sp-user-accent-pale,#f1f8f4); color:var(--sp-user-accent-dark,#075b35); font-weight:700; }
+.sp-settings-toggle { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:11px 0; }
+.sp-settings-toggle span { display:flex; flex-direction:column; gap:3px; }
+.sp-settings-toggle b { font-size:12px; }
+.sp-settings-toggle small { color:#718398; font-size:10px; }
+.sp-settings-toggle input { appearance:none; width:42px; height:24px; flex:0 0 auto; border-radius:999px; background:#cbd6d1; position:relative; cursor:pointer; transition:.15s; }
+.sp-settings-toggle input::after { content:""; position:absolute; width:18px; height:18px; left:3px; top:3px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:.15s; }
+.sp-settings-toggle input:checked { background:var(--sp-user-accent,#0b7a43); }
+.sp-settings-toggle input:checked::after { transform:translateX(18px); }
+.sp-settings-footer { display:flex; justify-content:space-between; gap:10px; padding:15px 24px; border-top:1px solid #dce5df; background:#fff; }
+html[data-sp-font-scale="small"] { font-size:93%; } html[data-sp-font-scale="large"] { font-size:108%; } html[data-sp-font-scale="xlarge"] { font-size:118%; }
+html[data-sp-density="compact"] .sp-card { padding-top:clamp(12px,1.5vw,18px); padding-bottom:clamp(12px,1.5vw,18px); }
+html[data-sp-density="spacious"] .sp-card { padding-top:clamp(24px,3vw,34px); padding-bottom:clamp(24px,3vw,34px); }
+html[data-sp-content-width="wide"] .sp-wrap { max-width:1440px; } html[data-sp-content-width="full"] .sp-wrap { max-width:none; margin-inline:24px; }
+html[data-sp-sidebar="right"] .sp-professional-layout { flex-direction:row-reverse; } html[data-sp-sidebar="right"] .sp-professional-sidebar { border-left:1px solid var(--border-color,#dce5df); border-right:0; }
+html[data-sp-sidebar-labels="off"] .sp-sidebar-link span:last-child { display:none; } html[data-sp-sidebar-labels="off"] .sp-sidebar-link { justify-content:center; }
+html[data-sp-animations="off"] *, html[data-sp-animations="off"] *::before, html[data-sp-animations="off"] *::after { transition:none !important; animation:none !important; scroll-behavior:auto !important; }
+html[data-sp-theme="dark"] .sp-settings-panel, html[data-sp-theme="dark"] .sp-settings-footer { background:#101a16; color:#d9e7df; border-color:#2b3b34; } html[data-sp-theme="dark"] .sp-settings-head h2, html[data-sp-theme="dark"] .sp-settings-scroll h3, html[data-sp-theme="dark"] .sp-settings-choice span { color:#d9e7df; } html[data-sp-theme="dark"] .sp-settings-choice, html[data-sp-theme="dark"] .sp-settings-color, html[data-sp-theme="dark"] .sp-settings-segment button, html[data-sp-theme="dark"] .sp-settings-close { background:#14221c; color:#b9ccc2; border-color:#2b3b34; }
+@media(max-width:640px){.sp-settings-trigger span{display:none}.sp-settings-panel{width:100%}.sp-settings-head,.sp-settings-scroll,.sp-settings-footer{padding-left:18px;padding-right:18px}}
