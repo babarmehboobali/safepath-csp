@@ -14,6 +14,7 @@ function Studio() {
   const [query, setQuery] = useState("");
   const [done, setDone] = useState<number[]>([]);
   const [track, setTrack] = useState<TrackId>("recommended");
+  const [showDone, setShowDone] = useState<"all" | "remaining" | "done">("all");
 
   useEffect(() => {
     const session = readSession();
@@ -26,80 +27,95 @@ function Studio() {
     const q = query.trim().toLowerCase();
     return pool.filter((row) => {
       if (domains.length && !domains.includes(row.domain)) return false;
+      if (showDone === "remaining" && done.includes(row.id)) return false;
+      if (showDone === "done" && !done.includes(row.id)) return false;
       if (!q) return true;
       return `${row.id} ${row.title} ${row.taskCode}`.toLowerCase().includes(q);
     });
-  }, [domains, query, pool]);
+  }, [domains, query, pool, done, showDone]);
+
+  const continueRow = pool.find((row) => !done.includes(row.id)) ?? pool[0];
+  const completedInTrack = pool.filter((row) => done.includes(row.id)).length;
+  const completionPct = pool.length ? Math.round((completedInTrack / pool.length) * 100) : 0;
 
   return (
     <Shell>
-      <div className="sp-wrap space-y-8">
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+      <div className="sp-study-page space-y-7">
+        <section className="sp-study-hero">
           <div>
-            <p className="sp-kicker">Learning</p>
-            <h1 className="sp-title mt-2 text-4xl">Pick a track, then a class.</h1>
+            <p className="sp-kicker">Learning workspace</p>
+            <h1>Study with a plan, not a list.</h1>
+            <p>Choose your track, focus a domain, and move through classes with visible progress. Your study path stays practical and exam-oriented.</p>
           </div>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search class, task, or title"
-            className="sp-field"
-          />
-        </div>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search class, task, or title" className="sp-field sp-study-search" aria-label="Search classes" />
+        </section>
+
+        <section className="sp-study-stats" aria-label="Study progress">
+          <div className="sp-study-stat"><strong>{completedInTrack}</strong><span>Classes completed</span></div>
+          <div className="sp-study-stat"><strong>{Math.max(0, pool.length - completedInTrack)}</strong><span>Classes remaining</span></div>
+          <div className="sp-study-stat"><strong>{completionPct}%</strong><span>Track progress</span></div>
+        </section>
+
+        {continueRow ? (
+          <section className="sp-study-continue">
+            <div><p className="sp-kicker">Continue learning</p><h2>{done.length ? "Pick up where you left off" : "Start your first class"}</h2><p>Next suggested class: {continueRow.title} · D{continueRow.domain} · {labelForTrack(track)}</p></div>
+            <Link to="/learn/$id" params={{ id: String(continueRow.id) }} className="sp-btn sp-btn-primary">{done.length ? "Continue →" : "Start class →"}</Link>
+          </section>
+        ) : null}
+
         <TrackPicker track={track} onChange={setTrack} />
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-fg-muted">Domains. All seven is the default. Click more than one.</p>
-          <button
-            type="button"
-            className={`sp-btn px-3 text-sm ${domains.length === 7 ? "sp-btn-primary" : "sp-btn-ghost"}`}
-            onClick={() => setDomains([1, 2, 3, 4, 5, 6, 7])}
-          >
-            All domains
-          </button>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4, 5, 6, 7].map((d) => {
-            const on = domains.includes(d);
-            return (
-              <button
-                key={d}
-                type="button"
-                onClick={() => {
-                  const next = on ? domains.filter((x) => x !== d) : [...domains, d];
-                  setDomains(next.length ? next.sort((a, b) => a - b) : [1, 2, 3, 4, 5, 6, 7]);
-                }}
-                className={`sp-card p-4 text-left ${on ? "ring-2 ring-accent" : ""}`}
-              >
-                <p className="font-mono text-xs text-accent">D{d} · {CSP_DOMAIN_WEIGHTS[d as keyof typeof CSP_DOMAIN_WEIGHTS]}%</p>
-                <p className="mt-1 font-medium">{DOMAIN_SHORT[d as keyof typeof DOMAIN_SHORT]}</p>
-                <p className="mt-1 text-sm text-fg-muted">{CSP_DOMAIN_NAMES[d as keyof typeof CSP_DOMAIN_NAMES]}</p>
-              </button>
-            );
-          })}
-        </div>
-        <p className="text-sm text-fg-muted">{rows.length} classes in this view.</p>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((row) => (
-            <Link
-              key={row.id}
-              to="/learn/$id"
-              params={{ id: String(row.id) }}
-              className="sp-card overflow-hidden text-inherit no-underline"
-            >
-              <img src={stillForClass(row.id, row.domain)} alt="" className="aspect-video w-full object-cover" loading="lazy" />
-              <div className="p-5">
-                <p className="font-mono text-xs text-fg-subtle">
-                  Class {row.id} · {row.taskCode}
-                  {done.includes(row.id) ? " · done" : ""}
-                </p>
-                <p className="mt-2 font-serif text-xl">{row.title}</p>
-                <p className="mt-2 text-sm text-fg-muted">
-                  {DOMAIN_SHORT[row.domain as keyof typeof DOMAIN_SHORT]} · {labelForTrack(track)}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div><p className="sp-kicker">CSP-11 domains</p><p className="text-sm text-fg-muted">Tap a domain to focus your study view. Tap again to include it with others.</p></div>
+            <button type="button" className={`sp-btn px-3 text-sm ${domains.length === 7 ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={() => setDomains([1, 2, 3, 4, 5, 6, 7])}>All domains</button>
+          </div>
+          <div className="sp-domain-grid">
+            {[1, 2, 3, 4, 5, 6, 7].map((d) => {
+              const on = domains.includes(d);
+              const domainPool = pool.filter((row) => row.domain === d);
+              const domainDone = domainPool.filter((row) => done.includes(row.id)).length;
+              const pct = domainPool.length ? Math.round((domainDone / domainPool.length) * 100) : 0;
+              return (
+                <button key={d} type="button" onClick={() => { const next = on ? domains.filter((x) => x !== d) : [...domains, d]; setDomains(next.length ? next.sort((a, b) => a - b) : [1, 2, 3, 4, 5, 6, 7]); }} className={`sp-domain-tile ${on ? "is-active" : ""}`} aria-pressed={on}>
+                  <p className="font-mono text-[10px] text-accent">D{d} · {CSP_DOMAIN_WEIGHTS[d as keyof typeof CSP_DOMAIN_WEIGHTS]}%</p>
+                  <p className="mt-1 truncate text-sm font-semibold">{DOMAIN_SHORT[d as keyof typeof DOMAIN_SHORT]}</p>
+                  <p className="mt-1 truncate text-[11px] text-fg-muted">{domainDone}/{domainPool.length} done</p>
+                  <div className="sp-domain-progress"><span style={{ width: `${pct}%` }} /></div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><p className="sp-kicker">Class library</p><p className="text-sm text-fg-muted">{rows.length} classes in this view · {labelForTrack(track)}</p></div>
+            <div className="flex gap-2" role="group" aria-label="Class status filter">
+              {(["all", "remaining", "done"] as const).map((id) => <button key={id} type="button" className={`sp-btn px-3 text-xs ${showDone === id ? "sp-btn-primary" : "sp-btn-ghost"}`} onClick={() => setShowDone(id)}>{id === "all" ? "All" : id === "remaining" ? "To study" : "Completed"}</button>)}
+            </div>
+          </div>
+
+          {rows.length ? (
+            <div className="sp-class-grid">
+              {rows.map((row) => {
+                const isDone = done.includes(row.id);
+                return (
+                  <Link key={row.id} to="/learn/$id" params={{ id: String(row.id) }} className="sp-class-card">
+                    <img src={stillForClass(row.id, row.domain)} alt="" loading="lazy" />
+                    <div className="sp-class-card-body">
+                      <p className="font-mono text-[10px] text-fg-subtle">Class {row.id} · {row.taskCode}</p>
+                      <p className="sp-class-card-title">{row.title}</p>
+                      <p className="sp-class-card-meta">{DOMAIN_SHORT[row.domain as keyof typeof DOMAIN_SHORT]} · {labelForTrack(track)} {isDone ? <span className="sp-class-card-badge">✓ Done</span> : null}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="sp-card p-8 text-center"><p className="font-serif text-xl">No classes match these filters.</p><p className="mt-2 text-sm text-fg-muted">Try another search, domain, or status.</p></div>
+          )}
+        </section>
       </div>
     </Shell>
   );
