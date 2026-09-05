@@ -3,6 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { CanonicalHost } from "@/components/CanonicalHost";
 import appCss from "../styles.css?url";
+import responsiveCss from "../responsive.css?url";
 
 const SITE = "https://safepath-csp.com";
 const TITLE = "SafePath CSP | CSP Exam Prep";
@@ -74,6 +75,7 @@ export const Route = createRootRoute({
       { rel: "canonical", href: `${SITE}/` },
       { rel: "icon", type: "image/png", href: "/brand/logo-mark.png" },
       { rel: "stylesheet", href: appCss },
+      { rel: "stylesheet", href: responsiveCss },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
