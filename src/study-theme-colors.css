@@ -1,0 +1,64 @@
+/* User-selected accent layer. Loaded last so the chosen accent stays consistent across every theme. */
+:root {
+  --sp-user-accent:#0b7a43;
+  --sp-user-accent-dark:#075b35;
+  --sp-user-accent-soft:#dff1e7;
+  --sp-user-accent-pale:#f1f8f4;
+}
+
+html[data-sp-accent] .sp-btn-primary,
+html[data-sp-accent] .sp-rail-next-button,
+html[data-sp-accent] .sp-context-pill.is-active,
+html[data-sp-accent] .sp-step-button.is-active,
+html[data-sp-accent] .sp-note-index {
+  background:var(--sp-user-accent) !important;
+  border-color:var(--sp-user-accent) !important;
+  color:#fff !important;
+}
+html[data-sp-accent] .sp-btn-primary:hover,
+html[data-sp-accent] .sp-rail-next-button:hover,
+html[data-sp-accent] .sp-context-pill.is-active:hover,
+html[data-sp-accent] .sp-step-button.is-active:hover { background:var(--sp-user-accent-dark) !important; }
+html[data-sp-accent] .sp-kicker,
+html[data-sp-accent] .text-accent,
+html[data-sp-accent] .sp-essential-check,
+html[data-sp-accent] .sp-rail-toc nav button.is-active,
+html[data-sp-accent] .sp-sidebar-link.is-module,
+html[data-sp-accent] .sp-sidebar-link:hover { color:var(--sp-user-accent) !important; }
+html[data-sp-accent] .sp-rail-toc nav button.is-active { border-left-color:var(--sp-user-accent) !important; background:var(--sp-user-accent-pale) !important; }
+html[data-sp-accent] .sp-progress-track span,
+html[data-sp-accent] .sp-domain-progress span { background:var(--sp-user-accent) !important; }
+html[data-sp-accent] .sp-explanation-card,
+html[data-sp-accent] .sp-application-strip,
+html[data-sp-accent] .sp-coach-card,
+html[data-sp-accent] .sp-notes-reading-intro,
+html[data-sp-accent] .sp-note-lead { border-color:var(--sp-user-accent-soft); }
+html[data-sp-accent] .sp-explanation-card,
+html[data-sp-accent] .sp-application-strip,
+html[data-sp-accent] .sp-coach-card,
+html[data-sp-accent] .sp-notes-reading-intro { background:var(--sp-user-accent-pale); }
+html[data-sp-accent] .sp-note-lead { border-left-color:var(--sp-user-accent) !important; background:var(--sp-user-accent-pale); }
+html[data-sp-accent] .sp-essential-number,
+html[data-sp-accent] .sp-step-button.is-visited:not(.is-active) .sp-step-number,
+html[data-sp-accent] .sp-domain-tile.is-active,
+html[data-sp-accent] .sp-class-card-badge { background:var(--sp-user-accent-soft) !important; color:var(--sp-user-accent-dark) !important; }
+html[data-sp-accent] .sp-essential-item:hover,
+html[data-sp-accent] .sp-domain-tile:hover,
+html[data-sp-accent] .sp-class-card:hover { border-color:color-mix(in srgb,var(--sp-user-accent) 35%,#fff) !important; }
+html[data-sp-accent] a:not(.sp-btn):not(.sp-sidebar-link) { color:var(--sp-user-accent); }
+
+/* Color controls */
+.appearance-accent-panel { margin-top:26px; padding:20px; border:1px solid var(--border,#dce6e1); border-radius:15px; background:var(--bg,#fff); }
+.appearance-accent-head { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; }
+.appearance-accent-head h2 { margin-top:5px; font-size:1.15rem; font-weight:800; }
+.appearance-accent-head p:last-child { margin-top:4px; color:#68798c; font-size:.82rem; line-height:1.6; }
+.appearance-accent-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:9px; margin-top:17px; }
+.appearance-accent-option { min-height:74px; display:grid; justify-items:start; align-content:center; gap:7px; padding:10px; border:1px solid #d8e2dd; border-radius:11px; background:#fff; color:#42566b; text-align:left; transition:.18s ease; }
+.appearance-accent-option:hover { transform:translateY(-1px); border-color:#9dbbaa; box-shadow:0 4px 12px rgba(20,55,37,.06); }
+.appearance-accent-option.is-selected { border-color:var(--sp-user-accent); box-shadow:inset 0 0 0 1px var(--sp-user-accent); background:var(--sp-user-accent-pale); }
+.appearance-accent-swatch { width:26px; height:26px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.12); }
+.appearance-accent-label { font-size:.7rem; font-weight:750; line-height:1.2; }
+.appearance-accent-reset { min-height:32px; padding:0 10px; border:1px solid #d2ded8; border-radius:8px; background:#fff; color:#56697c; font-size:.72rem; font-weight:700; }
+.appearance-accent-reset:hover { background:#f5f9f7; color:var(--sp-user-accent-dark); }
+@media (max-width:760px) { .appearance-accent-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } .appearance-accent-head { flex-direction:column; } }
+@media (max-width:430px) { .appearance-accent-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
