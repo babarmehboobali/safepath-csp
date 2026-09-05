@@ -1,0 +1,80 @@
+/* Shared visual language for Practice missions and the home Study tools stack. */
+.practice-mission-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.practice-mission-card{position:relative;overflow:hidden;min-height:215px;padding:22px;border-radius:18px;border:1px solid #d7e3dc;background:#fff;box-shadow:0 5px 18px rgba(10,30,20,.055)}
+.practice-mission-card::before{content:"";position:absolute;inset:0 0 auto;height:5px;background:var(--mission-accent,#0b7a43)}
+.practice-mission-card::after{content:"";position:absolute;right:-34px;top:-34px;width:108px;height:108px;border-radius:50%;background:var(--mission-wash,#e8f5ee);opacity:.72}
+.practice-mission-card:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(10,30,20,.12);border-color:var(--mission-accent,#0b7a43)}
+.practice-mission-card:nth-child(1){--mission-accent:#087f5b;--mission-wash:#d9f7ea}
+.practice-mission-card:nth-child(2){--mission-accent:#2563eb;--mission-wash:#dbeafe}
+.practice-mission-card:nth-child(3){--mission-accent:#7c3aed;--mission-wash:#ede9fe}
+.practice-mission-card:nth-child(4){--mission-accent:#0f766e;--mission-wash:#ccfbf1}
+.practice-mission-card:nth-child(5){--mission-accent:#d97706;--mission-wash:#fef3c7}
+.practice-mission-card:nth-child(6){--mission-accent:#ea580c;--mission-wash:#ffedd5}
+.practice-mission-card:nth-child(7){--mission-accent:#be123c;--mission-wash:#ffe4e6}
+.practice-mission-card:nth-child(8){--mission-accent:#4338ca;--mission-wash:#e0e7ff}
+.practice-mission-card:nth-child(9){--mission-accent:#0284c7;--mission-wash:#e0f2fe}
+.practice-mission-card:nth-child(10){--mission-accent:#dc2626;--mission-wash:#fee2e2}
+.practice-mission-card:nth-child(11){--mission-accent:#9333ea;--mission-wash:#f3e8ff}
+.practice-mission-card:nth-child(12){--mission-accent:#ca8a04;--mission-wash:#fef9c3}
+.practice-mission-card:nth-child(13){--mission-accent:#15803d;--mission-wash:#dcfce7}
+.practice-mission-card .practice-icon{position:relative;z-index:1;background:var(--mission-wash);color:var(--mission-accent);border:1px solid color-mix(in srgb,var(--mission-accent) 20%,transparent);width:48px;height:48px;border-radius:14px;font-size:22px}
+.practice-mission-card .practice-tag{position:relative;z-index:1;color:var(--mission-accent);background:var(--mission-wash);padding:7px 9px;border-radius:999px}
+.practice-card-body{position:relative;z-index:1;padding-top:20px}
+.practice-card-body h3{font-size:23px}
+.practice-card-body p{max-width:34ch;font-size:13.5px}
+.practice-card-bottom{position:relative;z-index:1;border-top-color:color-mix(in srgb,var(--mission-accent) 16%,#edf1ef)}
+.practice-card-bottom b{color:var(--mission-accent)}
+.practice-domain-sign{position:relative;overflow:hidden;min-height:72px}
+.practice-domain-sign::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--domain-accent,#0b7a43)}
+.practice-domain-sign:nth-child(1){--domain-accent:#087f5b}.practice-domain-sign:nth-child(2){--domain-accent:#2563eb}.practice-domain-sign:nth-child(3){--domain-accent:#7c3aed}.practice-domain-sign:nth-child(4){--domain-accent:#d97706}.practice-domain-sign:nth-child(5){--domain-accent:#0284c7}.practice-domain-sign:nth-child(6){--domain-accent:#dc2626}.practice-domain-sign:nth-child(7){--domain-accent:#15803d}
+.practice-domain-sign>span{background:color-mix(in srgb,var(--domain-accent) 13%,#fff);color:var(--domain-accent)}
+.practice-domain-sign i{color:var(--domain-accent)}
+
+/* The home page uses the same visual language as Practice, so candidates recognize the same tools everywhere. */
+#desks .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+#desks .grid>a.sp-card{position:relative;overflow:hidden;min-height:142px;padding:20px 20px 18px;border-radius:16px;border:1px solid #d7e3dc;background:#fff;box-shadow:0 4px 15px rgba(10,30,20,.045);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+#desks .grid>a.sp-card::before{content:"";display:block;width:46px;height:6px;margin-bottom:15px;border-radius:999px;background:var(--tool-accent,#0b7a43)}
+#desks .grid>a.sp-card::after{content:"→";position:absolute;right:17px;bottom:14px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--tool-wash,#e8f5ee);color:var(--tool-accent,#0b7a43);font-weight:700}
+#desks .grid>a.sp-card:hover{transform:translateY(-4px);border-color:var(--tool-accent,#0b7a43);box-shadow:0 13px 28px rgba(10,30,20,.10)}
+#desks .grid>a.sp-card .font-serif{font-size:21px;color:var(--tool-accent,#0b7a43)}
+#desks .grid>a:nth-child(1){--tool-accent:#087f5b;--tool-wash:#d9f7ea}.#desks .grid>a:nth-child(2){--tool-accent:#2563eb;--tool-wash:#dbeafe}
+#desks .grid>a:nth-child(2){--tool-accent:#2563eb;--tool-wash:#dbeafe}.#desks .grid>a:nth-child(3){--tool-accent:#7c3aed;--tool-wash:#ede9fe}
+#desks .grid>a:nth-child(3){--tool-accent:#7c3aed;--tool-wash:#ede9fe}.#desks .grid>a:nth-child(4){--tool-accent:#d97706;--tool-wash:#fef3c7}
+#desks .grid>a:nth-child(4){--tool-accent:#d97706;--tool-wash:#fef3c7}.#desks .grid>a:nth-child(5){--tool-accent:#ea580c;--tool-wash:#ffedd5}
+#desks .grid>a:nth-child(5){--tool-accent:#ea580c;--tool-wash:#ffedd5}.#desks .grid>a:nth-child(6){--tool-accent:#be123c;--tool-wash:#ffe4e6}
+#desks .grid>a:nth-child(6){--tool-accent:#be123c;--tool-wash:#ffe4e6}.#desks .grid>a:nth-child(7){--tool-accent:#4338ca;--tool-wash:#e0e7ff}
+#desks .grid>a:nth-child(7){--tool-accent:#4338ca;--tool-wash:#e0e7ff}.#desks .grid>a:nth-child(8){--tool-accent:#0284c7;--tool-wash:#e0f2fe}
+#desks .grid>a:nth-child(8){--tool-accent:#0284c7;--tool-wash:#e0f2fe}.#desks .grid>a:nth-child(9){--tool-accent:#dc2626;--tool-wash:#fee2e2}
+#desks .grid>a:nth-child(9){--tool-accent:#dc2626;--tool-wash:#fee2e2}.#desks .grid>a:nth-child(10){--tool-accent:#9333ea;--tool-wash:#f3e8ff}
+#desks .grid>a:nth-child(10){--tool-accent:#9333ea;--tool-wash:#f3e8ff}.#desks .grid>a:nth-child(11){--tool-accent:#15803d;--tool-wash:#dcfce7}
+#desks .grid>a:nth-child(11){--tool-accent:#15803d;--tool-wash:#dcfce7}.#desks .grid>a:nth-child(12){--tool-accent:#0f766e;--tool-wash:#ccfbf1}
+#desks .grid>a:nth-child(12){--tool-accent:#0f766e;--tool-wash:#ccfbf1}.#desks .grid>a:nth-child(13){--tool-accent:#ca8a04;--tool-wash:#fef9c3}
+#desks .grid>a:nth-child(13){--tool-accent:#ca8a04;--tool-wash:#fef9c3}.#desks .grid>a:nth-child(14){--tool-accent:#2563eb;--tool-wash:#dbeafe}
+#desks .grid>a:nth-child(14){--tool-accent:#2563eb;--tool-wash:#dbeafe}.#desks .grid>a:nth-child(15){--tool-accent:#087f5b;--tool-wash:#d9f7ea}
+#desks .grid>a:nth-child(15){--tool-accent:#087f5b;--tool-wash:#d9f7ea}.#desks .grid>a:nth-child(16){--tool-accent:#7c3aed;--tool-wash:#ede9fe}
+#desks .grid>a:nth-child(16){--tool-accent:#7c3aed;--tool-wash:#ede9fe}.#desks .grid>a:nth-child(17){--tool-accent:#0284c7;--tool-wash:#e0f2fe}
+#desks .grid>a:nth-child(17){--tool-accent:#0284c7;--tool-wash:#e0f2fe}.#desks .grid>a:nth-child(18){--tool-accent:#15803d;--tool-wash:#dcfce7}
+#desks .grid>a:nth-child(18){--tool-accent:#15803d;--tool-wash:#dcfce7}.#desks .grid>a:nth-child(19){--tool-accent:#d97706;--tool-wash:#fef3c7}
+#desks .grid>a:nth-child(19){--tool-accent:#d97706;--tool-wash:#fef3c7}.#desks .grid>a:nth-child(20){--tool-accent:#be123c;--tool-wash:#ffe4e6}
+#desks .grid>a:nth-child(20){--tool-accent:#be123c;--tool-wash:#ffe4e6}.#desks .grid>a:nth-child(21){--tool-accent:#4338ca;--tool-wash:#e0e7ff}
+#desks .grid>a:nth-child(21){--tool-accent:#4338ca;--tool-wash:#e0e7ff}.#desks .grid>a:nth-child(22){--tool-accent:#ea580c;--tool-wash:#ffedd5}
+#desks .grid>a:nth-child(22){--tool-accent:#ea580c;--tool-wash:#ffedd5}.#desks .grid>a:nth-child(23){--tool-accent:#2563eb;--tool-wash:#dbeafe}
+#desks .grid>a:nth-child(23){--tool-accent:#2563eb;--tool-wash:#dbeafe}.#desks .grid>a:nth-child(24){--tool-accent:#087f5b;--tool-wash:#d9f7ea}
+#desks .grid>a:nth-child(24){--tool-accent:#087f5b;--tool-wash:#d9f7ea}.#desks .grid>a:nth-child(25){--tool-accent:#7c3aed;--tool-wash:#ede9fe}
+#desks .grid>a:nth-child(25){--tool-accent:#7c3aed;--tool-wash:#ede9fe}.#desks .grid>a:nth-child(26){--tool-accent:#dc2626;--tool-wash:#fee2e2}
+#desks .grid>a:nth-child(26){--tool-accent:#dc2626;--tool-wash:#fee2e2}.#desks .grid>a:nth-child(27){--tool-accent:#15803d;--tool-wash:#dcfce7}
+#desks .grid>a:nth-child(27){--tool-accent:#15803d;--tool-wash:#dcfce7}.#desks .grid>a:nth-child(28){--tool-accent:#0f766e;--tool-wash:#ccfbf1}
+#desks .grid>a:nth-child(28){--tool-accent:#0f766e;--tool-wash:#ccfbf1}.#desks .grid>a:nth-child(29){--tool-accent:#ca8a04;--tool-wash:#fef9c3}
+#desks .grid>a:nth-child(29){--tool-accent:#ca8a04;--tool-wash:#fef9c3}.#desks .grid>a:nth-child(30){--tool-accent:#0284c7;--tool-wash:#e0f2fe}
+#desks .grid>a:nth-child(30){--tool-accent:#0284c7;--tool-wash:#e0f2fe}
+
+.sp-study-hero-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:min(100%,360px)}
+.sp-study-plan-cta{display:flex;align-items:center;gap:12px;padding:13px 15px;border:1px solid #cfe1d7;border-radius:14px;background:linear-gradient(135deg,#f2fbf6,#fff);color:#183047;text-decoration:none;box-shadow:0 5px 16px rgba(10,30,20,.05);transition:.16s ease}
+.sp-study-plan-cta:hover{transform:translateY(-2px);border-color:#0b7a43;box-shadow:0 10px 24px rgba(10,30,20,.09)}
+.sp-study-plan-cta.is-ready{background:linear-gradient(135deg,#e6f7ed,#fff);border-color:#9fd4b5}
+.sp-study-plan-icon{width:40px;height:40px;display:grid;place-items:center;flex:0 0 40px;border-radius:11px;background:#d9f7e7;color:#087f5b;font-size:20px}
+.sp-study-plan-cta span:not(.sp-study-plan-icon){display:flex;flex-direction:column;min-width:0}.sp-study-plan-cta b{font-size:13px}.sp-study-plan-cta small{margin-top:2px;color:#718398;font-size:10px;line-height:1.35}.sp-study-plan-cta>strong{margin-left:auto;color:#087f5b;font-size:19px}
+.sp-study-plan-status{text-decoration:none;color:inherit;transition:.16s ease}.sp-study-plan-status:hover{border-color:#0b7a43;background:#f2fbf6}.sp-study-plan-status strong{color:#087f5b}
+
+@media (max-width:1000px){.practice-mission-grid,#desks .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.practice-mission-grid,#desks .grid{grid-template-columns:1fr}.practice-mission-card{min-height:185px}.sp-study-hero-actions{min-width:0}.sp-study-plan-cta{width:100%}}
