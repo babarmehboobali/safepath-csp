@@ -1,7 +1,8 @@
 import { CLASS_PACKS } from "@/content/classes";
 import { CATALOG } from "@/lib/safepath/catalog";
 
-export type CardKind = "core" | "apply" | "trap" | "decision" | "teachback";
+export type CardKind = "core" | "apply" | "contrast" | "trap" | "decision" | "teachback" | "formula" | "rapid";
+export type CardDifficulty = 1 | 2 | 3 | 4 | 5;
 
 export type StudyCard = {
   id: string;
@@ -10,43 +11,55 @@ export type StudyCard = {
   front: string;
   back: string;
   kind: CardKind;
-  domain?: string;
-  topic?: string;
+  difficulty: CardDifficulty;
+  domain: string;
+  tags: string[];
+  source: "lesson-structured";
 };
 
+function clean(value: unknown) {
+  return String(value ?? "")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseList(value: unknown): string[] {
-  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (Array.isArray(value)) return value.map(clean).filter(Boolean);
   if (typeof value !== "string") return [];
   try {
     const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
-    if (parsed && typeof parsed === "object") return Object.values(parsed).map(String).filter(Boolean);
+    if (Array.isArray(parsed)) return parsed.map(clean).filter(Boolean);
+    if (parsed && typeof parsed === "object") return Object.values(parsed).map(clean).filter(Boolean);
   } catch {
-    // Some legacy class packs contain plain text rather than JSON.
+    // Legacy lesson packs may contain plain text.
   }
   return value
-    .split(/\n|\r\n|;(?=\s*\w)/)
-    .map((s) => s.replace(/^[-•\d.)\s]+/, "").trim())
+    .split(/\n|\r\n|;(?=\s*\w)|\|/)
+    .map((s) => clean(s.replace(/^[-•\d.)\s]+/, "")))
     .filter(Boolean);
 }
 
-function clean(value: unknown, fallback: string) {
-  const text = String(value ?? "").replace(/\s+/g, " ").trim();
-  return text || fallback;
+function pushCard(out: StudyCard[], card: Omit<StudyCard, "id">) {
+  if (card.front.length < 18 || card.back.length < 18) return;
+  const frontKey = card.front.toLowerCase();
+  const backKey = card.back.toLowerCase();
+  if (out.some((x) => x.front.toLowerCase() === frontKey)) return;
+  if (out.some((x) => x.classId === card.classId && x.back.toLowerCase() === backKey)) return;
+  out.push({ ...card, id: `${card.classId}:${card.kind}:${out.length}` });
 }
 
-function pushCard(out: StudyCard[], card: Omit<StudyCard, "id">) {
-  const id = `${card.classId}:${card.kind}`;
-  if (out.some((x) => x.id === id)) return;
-  if (card.front.length < 12 || card.back.length < 12) return;
-  out.push({ ...card, id });
+function difficulty(kind: CardKind): CardDifficulty {
+  if (kind === "rapid" || kind === "core") return 1;
+  if (kind === "formula" || kind === "contrast") return 2;
+  if (kind === "apply" || kind === "teachback") return 3;
+  return 4;
 }
 
 /**
- * Builds retrieval cards from the structured lesson content instead of the old
- * generic 560-card package. Each lesson can contribute different retrieval
- * angles: rule, worked application, trap recognition, decision logic and
- * teach-back. This prevents the old "same answer for every card" pattern.
+ * Compiles structured lesson evidence into varied retrieval experiences.
+ * This intentionally does not invent technical facts or manufacture fake
+ * distractors. Richer cards come from richer source material.
  */
 export function classCards(): StudyCard[] {
   const out: StudyCard[] = [];
@@ -55,72 +68,93 @@ export function classCards(): StudyCard[] {
     const fields = CLASS_PACKS[row.id]?.classFields;
     if (!fields) continue;
 
-    const rule = clean(fields.rule, clean(fields.brief, "Review the governing rule from this lesson."));
-    const worked = clean(fields.workedCase, "Apply the lesson rule to a new workplace scenario and show your reasoning.");
+    const title = clean(row.title);
+    const domain = clean(row.domain) || "CSP";
+    const rule = clean(fields.rule) || clean(fields.brief);
+    const worked = clean(fields.workedCase);
+    const hook = clean(fields.hook) || clean(fields.hookOilGas) || clean(fields.hookConstruction);
     const traps = parseList(fields.trapsJson);
     const must = parseList(fields.mustScoreJson);
     const decisions = parseList(fields.stemIfThenJson);
-    const contrast = parseList(fields.contrastJson);
-    const teachBack = clean(fields.teachBackKey, "Explain the rule, the strongest evidence, one field example, and one common error.");
+    const contrasts = parseList(fields.contrastJson);
+    const teachBack = clean(fields.teachBackKey);
+    const formula = clean(fields.formulaSlug);
 
-    pushCard(out, {
-      classId: row.id,
-      title: row.title,
-      front: `CORE RULE — What is the governing CSP rule for ${row.title}?`,
+    if (rule) pushCard(out, {
+      classId: row.id, title,
+      front: `CORE RULE — What is the governing rule for ${title}? State the rule and its limiting condition.`,
       back: rule,
-      kind: "core",
+      kind: "core", difficulty: difficulty("core"), domain,
+      tags: ["rule", "foundation"], source: "lesson-structured",
     });
 
-    pushCard(out, {
-      classId: row.id,
-      title: row.title,
-      front: `APPLY — How would you use the ${row.title} rule in a real workplace decision?`,
+    if (worked) pushCard(out, {
+      classId: row.id, title,
+      front: `APPLICATION — Apply ${title} to a workplace decision. What would you verify before accepting the proposed action?`,
       back: worked,
-      kind: "apply",
+      kind: "apply", difficulty: difficulty("apply"), domain,
+      tags: ["application", "field-transfer"], source: "lesson-structured",
     });
 
-    const trapText = traps.length
-      ? `Common traps to reject: ${traps.slice(0, 5).join(" • ")}. Do not choose an attractive lower-level control when the stem leaves a stronger control open.`
-      : clean(contrast[0], "Identify the most plausible distractor and explain why it fails the governing rule.");
-    pushCard(out, {
-      classId: row.id,
-      title: row.title,
-      front: `TRAPS — What mistake is most likely to make you miss a question on ${row.title}?`,
-      back: trapText,
-      kind: "trap",
+    for (const item of contrasts.slice(0, 4)) pushCard(out, {
+      classId: row.id, title,
+      front: `COMPARE / CONTRAST — In ${title}, explain this distinction without relying on the wording alone: ${item}`,
+      back: item,
+      kind: "contrast", difficulty: difficulty("contrast"), domain,
+      tags: ["contrast", "discrimination"], source: "lesson-structured",
     });
 
-    const decisionText = decisions.length
-      ? decisions.slice(0, 6).join(" | ")
-      : must.length
-        ? must.slice(0, 5).join(" | ")
-        : rule;
-    pushCard(out, {
-      classId: row.id,
-      title: row.title,
-      front: `DECISION — When the stem changes, what should you do first for ${row.title}?`,
-      back: decisionText,
-      kind: "decision",
+    if (traps.length) pushCard(out, {
+      classId: row.id, title,
+      front: `EXAM TRAP — Which plausible mistake could cause a competent safety professional to select the wrong answer for ${title}?`,
+      back: `Reject these trap patterns: ${traps.slice(0, 6).join(" • ")}. Check the stem's constraints, governing principle, hierarchy and verification evidence before choosing.`,
+      kind: "trap", difficulty: difficulty("trap"), domain,
+      tags: ["exam-trap", "distractor"], source: "lesson-structured",
     });
 
-    // Add a fifth card only where the lesson has enough structured material.
-    // This naturally produces a variable, non-templated deck rather than
-    // forcing identical cards into every lesson.
-    if (must.length >= 3 || contrast.length >= 3 || fields.formulaSlug) {
-      const teachText = must.length >= 3
-        ? `Teach-back checklist: ${must.slice(0, 6).join(" • ")}`
-        : contrast.length >= 3
-          ? `Distinguish: ${contrast.slice(0, 6).join(" • ")}`
-          : `Formula cue: ${fields.formulaSlug}. ${teachBack}`;
-      pushCard(out, {
-        classId: row.id,
-        title: row.title,
-        front: `TEACH-BACK — Can you explain ${row.title} without looking at the notes?`,
-        back: `${teachText} ${teachBack}`,
-        kind: "teachback",
-      });
-    }
+    for (const item of decisions.slice(0, 5)) pushCard(out, {
+      classId: row.id, title,
+      front: `DECISION LOGIC — When the scenario changes, what action follows from this decision map? ${item}`,
+      back: item,
+      kind: "decision", difficulty: difficulty("decision"), domain,
+      tags: ["decision", "scenario"], source: "lesson-structured",
+    });
+
+    if (must.length >= 3) pushCard(out, {
+      classId: row.id, title,
+      front: `TEACH-BACK — Close your notes. Teach the must-score knowledge for ${title} as if coaching another HSE professional.`,
+      back: `${must.slice(0, 8).join(" • ")}${teachBack ? ` Teach-back cue: ${teachBack}` : ""}`,
+      kind: "teachback", difficulty: difficulty("teachback"), domain,
+      tags: ["teach-back", "must-score", "retrieval"], source: "lesson-structured",
+    });
+
+    if (formula) pushCard(out, {
+      classId: row.id, title,
+      front: `FORMULA RECALL — For ${formula}, what is being calculated, what variables/units must be checked, and what condition makes the formula appropriate?`,
+      back: worked || rule,
+      kind: "formula", difficulty: difficulty("formula"), domain,
+      tags: ["formula", "units", "calculator"], source: "lesson-structured",
+    });
+
+    if (hook) pushCard(out, {
+      classId: row.id, title,
+      front: `RAPID RECALL — Give the one-sentence mental model that should come to mind when you see ${title} in a CSP stem.`,
+      back: hook,
+      kind: "rapid", difficulty: difficulty("rapid"), domain,
+      tags: ["rapid", "mental-model"], source: "lesson-structured",
+    });
   }
 
   return out;
+}
+
+export function shuffleCards<T>(items: T[], seed = Math.random()): T[] {
+  const copy = [...items];
+  let state = Math.max(1, Math.floor(Math.abs(seed) * 2147483647));
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    state = (state * 48271) % 2147483647;
+    const j = state % (i + 1);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
