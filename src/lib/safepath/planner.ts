@@ -49,6 +49,11 @@ export function readPlan(): StudyPlan {
   }
 }
 
+export function hasSavedPlan(): boolean {
+  if (typeof window === "undefined") return false;
+  return Boolean(localStorage.getItem(KEY));
+}
+
 export function writePlan(plan: StudyPlan) {
   localStorage.setItem(KEY, JSON.stringify(plan));
 }
