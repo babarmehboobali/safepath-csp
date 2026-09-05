@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Clip } from "./Clip";
 import type { PracticalPack } from "@/lib/safepath/practical";
 
 function speak(text: string, on: boolean) {
@@ -22,8 +23,8 @@ export function PracticalWalk({ pack }: { pack: PracticalPack }) {
   return (
     <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
       <div>
-        <img src={pack.still} alt="" className="w-full bg-[#f3f0e7] object-contain" />
-        <video className="mt-3 aspect-video w-full object-contain bg-[#0c1c16]" autoPlay muted loop playsInline poster={pack.still} src={pack.video} />
+        <img src={pack.still} alt="" className="max-h-[240px] w-full bg-[#f3f0e7] object-contain" />
+        <Clip src={pack.video} poster={pack.still} title="practical" />
         <p className="px-5 py-3 text-sm text-fg-muted">{row.look}</p>
       </div>
       <div className="space-y-4 p-5">

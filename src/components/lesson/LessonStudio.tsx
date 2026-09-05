@@ -12,6 +12,7 @@ import { DiagramForClass } from "./Diagrams";
 import { practicalFor } from "@/lib/safepath/practical";
 import { PracticalWalk } from "./PracticalWalk";
 import { Drill } from "./Drill";
+import { Clip, MediaQualityPicker } from "./Clip";
 import { LANG_META, type GlossLang } from "@/lib/safepath/glossary";
 
 type Slide = "scene" | "rule" | "picture" | "practical" | "case" | "must" | "notes" | "drill";
@@ -178,15 +179,16 @@ export function LessonStudio({ entry, pack, nextId }: { entry: CatalogEntry; pac
             {row.label}
           </button>
         ))}
+        <MediaQualityPicker />
       </div>
 
       <section className="sp-card overflow-hidden">
         {slide === "scene" ? (
           <div>
             {media.video ? (
-              <video className="aspect-video w-full object-cover" autoPlay muted loop playsInline poster={media.still} src={media.video} />
+              <Clip src={media.video} poster={media.still} title="scene" />
             ) : (
-              <img src={media.still} alt="" className="aspect-video w-full object-cover" />
+              <img src={media.still} alt="" className="sp-clip-el" />
             )}
             <div className="space-y-3 p-5 sm:p-7">
               <p className="sp-kicker">Scene · Class {entry.id} · {entry.title}</p>
@@ -221,9 +223,9 @@ export function LessonStudio({ entry, pack, nextId }: { entry: CatalogEntry; pac
               <p className="sp-kicker">Practical</p>
               <p className="font-serif text-2xl">Field walk for this class is next. Use Scene and Model until it lands.</p>
               {media.video ? (
-                <video className="aspect-video w-full object-cover" autoPlay muted loop playsInline poster={media.still} src={media.video} />
+                <Clip src={media.video} poster={media.still} title="practical" />
               ) : (
-                <img src={media.still} alt="" className="aspect-video w-full object-cover" />
+                <img src={media.still} alt="" className="sp-clip-el" />
               )}
             </div>
           )

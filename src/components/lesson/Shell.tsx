@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { hydrateSession, readSession } from "@/lib/safepath/session";
+import { MediaQualityPicker } from "@/components/lesson/Clip";
+import { hydrateSession } from "@/lib/safepath/session";
 
 const LINKS = [
   { to: "/today", label: "Today" },
@@ -98,6 +99,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link to="/disclaimer">Disclaimer</Link>
             <Link to="/contact">Contact / suggestions</Link>
             <Link to="/about">About</Link>
+            <div className="pt-3">
+              <MediaQualityPicker />
+            </div>
           </div>
         </div>
       </footer>

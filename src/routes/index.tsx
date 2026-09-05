@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Clip } from "@/components/lesson/Clip";
 import { Shell } from "@/components/lesson/Shell";
 import { CSP_DOMAIN_NAMES, CSP_DOMAIN_WEIGHTS, DOMAIN_SHORT } from "@/lib/safepath/domains";
 
@@ -85,15 +86,7 @@ function Home() {
             </div>
           </div>
           <div className="sp-card min-w-0 overflow-hidden">
-            <video
-              className="aspect-video w-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster="/lessons/hierarchy.jpg"
-              src="/lessons/hierarchy.mp4"
-            />
+            <Clip src="/lessons/hierarchy.mp4" poster="/lessons/hierarchy.jpg" title="preview" />
             <div className="p-5">
               <p className="sp-kicker">Class 2 · D1.01</p>
               <p className="mt-1 font-serif text-2xl">Hierarchy of Controls</p>
@@ -230,15 +223,7 @@ function Home() {
                 params={{ id: row.id }}
                 className="sp-card overflow-hidden text-inherit no-underline"
               >
-                <video
-                  className="aspect-video w-full object-cover"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  poster={row.still}
-                  src={row.video}
-                />
+                <Clip src={row.video} poster={row.still} title={row.title} />
                 <div className="p-5">
                   <p className="font-mono text-xs text-fg-subtle">Class {row.id}</p>
                   <p className="mt-1 font-serif text-2xl">{row.title}</p>

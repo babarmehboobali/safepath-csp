@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Clip } from "@/components/lesson/Clip";
 import { Shell } from "@/components/lesson/Shell";
 import { loginAccount, registerAccount, resetAccount } from "@/lib/safepath/accounts";
 import { forgottenEmail, rememberedEmail } from "@/lib/safepath/persist";
@@ -79,7 +80,7 @@ function Login() {
     <Shell>
       <div className="sp-wrap grid max-w-5xl gap-8 lg:grid-cols-[1fr_1.05fr] lg:items-center">
         <div className="sp-card overflow-hidden">
-          <video className="aspect-video w-full object-cover" autoPlay muted loop playsInline poster="/lessons/hierarchy.jpg" src="/lessons/hierarchy.mp4" />
+          <Clip src="/lessons/hierarchy.mp4" poster="/lessons/hierarchy.jpg" title="preview" />
           <div className="p-6">
             <p className="sp-kicker">Seat</p>
             <p className="mt-2 font-serif text-2xl">Read the agreement. Then email and password.</p>
