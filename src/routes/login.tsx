@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Clip } from "@/components/lesson/Clip";
 import { Shell } from "@/components/lesson/Shell";
+import { signIn as socialSignIn } from "@/lib/auth/client";
 import { loginAccount, registerAccount, requestPasswordReset } from "@/lib/safepath/accounts";
 import { forgottenEmail, rememberedEmail } from "@/lib/safepath/persist";
 import { hydrateSession, readSession, writeSession } from "@/lib/safepath/session";
@@ -24,6 +25,7 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [socialBusy, setSocialBusy] = useState(false);
   const [mode, setMode] = useState<"login" | "register" | "reset">("login");
   const [savedEmail, setSavedEmail] = useState("");
   const [stay, setStay] = useState(true);
@@ -35,6 +37,28 @@ function Login() {
       if (s.agreed) setAgreed(true);
     });
   }, []);
+
+  async function continueWithGoogle() {
+    if (!agreed) {
+      setReadOpen(true);
+      setError("Open and accept the agreement before continuing.");
+      return;
+    }
+    setSocialBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      // SafePath's existing auth broker already provides Google OAuth. This uses
+      // the same Better Auth session/Neon identity as email-password sign-in.
+      await socialSignIn("grok-google", {
+        callbackURL: mode === "register" ? "/onboarding" : "/today",
+        errorCallbackURL: "/login?oauth=error",
+      });
+    } catch (err) {
+      setSocialBusy(false);
+      setError(err instanceof Error ? err.message : "Google sign-in failed.");
+    }
+  }
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,6 +105,19 @@ function Login() {
             <button type="button" className="sp-btn sp-btn-primary w-full" onClick={() => setReadOpen(true)}>{agreed ? "View agreement" : "Read agreement"}</button>
             <label className="flex items-center gap-3 text-sm text-fg"><input type="checkbox" className="h-4 w-4 accent-accent" checked={agreed} readOnly /><span>I have read and accept the agreement.</span></label>
           </div>
+          {mode !== "reset" ? <>
+            <button
+              type="button"
+              className="sp-btn sp-btn-ghost flex w-full items-center justify-center gap-3 border border-fg/20 bg-white/70 py-3 font-semibold"
+              onClick={() => void continueWithGoogle()}
+              disabled={socialBusy || busy}
+              aria-label="Continue with Google"
+            >
+              <span aria-hidden="true" className="grid h-6 w-6 place-items-center rounded-full bg-white text-sm font-bold shadow-sm">G</span>
+              {socialBusy ? "Connecting to Google…" : "Continue with Google"}
+            </button>
+            <div className="flex items-center gap-3 text-xs text-fg-subtle"><span className="h-px flex-1 bg-fg/15" /><span>OR</span><span className="h-px flex-1 bg-fg/15" /></div>
+          </> : null}
           <form className="sp-card space-y-4 p-6" onSubmit={submit}>
             {mode === "register" ? <label className="block text-sm">Name<input name="name" className="sp-field mt-1" autoComplete="name" required placeholder="Your name" /></label> : null}
             <label className="block text-sm">Email<input name="email" type="email" required className="sp-field mt-1" autoComplete="username" defaultValue={savedEmail} placeholder="you@example.com" /></label>
@@ -89,7 +126,7 @@ function Login() {
             {error ? <p className="text-sm text-bad">{error}</p> : null}
             {notice ? <p className="rounded-lg border border-ok bg-ok/10 p-3 text-sm">{notice}</p> : null}
             {mode === "login" ? <label className="flex items-center gap-3 text-sm text-fg"><input type="checkbox" checked={stay} onChange={(e) => setStay(e.target.checked)} className="h-4 w-4 accent-accent" />Stay signed in on this device</label> : null}
-            <button type="submit" className="sp-btn sp-btn-primary w-full" disabled={busy}>{busy ? "Working…" : mode === "reset" ? "Email reset link" : mode === "register" ? "Create seat" : "Log in"}</button>
+            <button type="submit" className="sp-btn sp-btn-primary w-full" disabled={busy || socialBusy}>{busy ? "Working…" : mode === "reset" ? "Email reset link" : mode === "register" ? "Create seat" : "Log in"}</button>
             {mode === "login" ? <button type="button" className="sp-btn sp-btn-ghost w-full" onClick={() => { setMode("register"); setError(null); }}>Need an account? Register</button> : <button type="button" className="sp-btn sp-btn-ghost w-full" onClick={() => { setMode("login"); setError(null); setNotice(null); }}>Back to log in</button>}
           </form>
           <p className="text-sm text-fg-subtle">Independent study. <Link to="/about" className="text-accent">Honesty notice</Link> · <Link to="/contact" className="text-accent">Suggestions</Link>.</p>
