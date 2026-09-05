@@ -4,167 +4,171 @@ import { Shell } from "@/components/lesson/Shell";
 
 export const Route = createFileRoute("/eligibility")({ component: Eligibility });
 
-type Credential =
-  | "ASP"
-  | "GSP"
-  | "TSP"
-  | "CIH"
-  | "CMIOSH"
-  | "CFIOSH"
-  | "CRSP"
-  | "ACRC"
-  | "CSE"
-  | "ITC-ILO"
-  | "NEBOSH"
-  | "SISO"
-  | "India Industrial Safety"
-  | "Other";
+type Credential = "NEBOSH_IDIP" | "NEBOSH_NDIP" | "TSP" | "ASP" | "GSP" | "CIH" | "CMIOSH" | "CFIOSH" | "CRSP" | "OTHER";
 
-const CREDENTIALS: Credential[] = [
-  "ASP",
-  "GSP",
-  "TSP",
-  "CIH",
-  "CMIOSH",
-  "CFIOSH",
-  "CRSP",
-  "ACRC",
-  "CSE",
-  "ITC-ILO",
-  "NEBOSH",
-  "SISO",
-  "India Industrial Safety",
-  "Other",
-];
+function addYears(value: string, years: number) {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return null;
+  d.setFullYear(d.getFullYear() + years);
+  return d;
+}
+
+function formatDate(value: Date | null) {
+  if (!value) return "—";
+  return value.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
 
 function Eligibility() {
-  const [degree, setDegree] = useState<"yes" | "no">("yes");
-  const [foreignDegree, setForeignDegree] = useState<"yes" | "no">("yes");
+  const [degree, setDegree] = useState("yes");
+  const [foreignDegree, setForeignDegree] = useState("yes");
   const [years, setYears] = useState("4");
-  const [safetyPct, setSafetyPct] = useState("75");
-  const [preventive, setPreventive] = useState<"yes" | "no" | "unsure">("yes");
-  const [breadth, setBreadth] = useState<"yes" | "no" | "unsure">("yes");
-  const [credential, setCredential] = useState<Credential>("NEBOSH");
-  const [credentialCurrent, setCredentialCurrent] = useState<"yes" | "no" | "unsure">("yes");
-  const [disclosure, setDisclosure] = useState<"no" | "yes" | "unsure">("no");
-  const [checked, setChecked] = useState(false);
+  const [preventative, setPreventative] = useState("50");
+  const [credential, setCredential] = useState<Credential>("NEBOSH_IDIP");
+  const [neboshResultDate, setNeboshResultDate] = useState("");
+  const [tspApplied, setTspApplied] = useState("not-yet");
+  const [tspAppliedDate, setTspAppliedDate] = useState("");
+  const [tspAwardedDate, setTspAwardedDate] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-  const result = useMemo(() => {
-    const y = Number(years);
-    const pct = Number(safetyPct);
-    const issues: string[] = [];
-    const warnings: string[] = [];
+  const tspDeadline = useMemo(() => addYears(neboshResultDate, 1), [neboshResultDate]);
+  const tspStatus = useMemo(() => {
+    if (credential !== "NEBOSH_IDIP" && credential !== "NEBOSH_NDIP") return null;
+    if (!neboshResultDate) return "missing-date";
+    const deadline = addYears(neboshResultDate, 1);
+    if (tspApplied === "yes") return "applied";
+    if (tspApplied === "no") return "missed";
+    if (deadline && new Date() > deadline) return "late";
+    return "action";
+  }, [credential, neboshResultDate, tspApplied]);
 
-    if (degree !== "yes") issues.push("A bachelor's degree (minimum) is required.");
-    if (y < 4) issues.push("You currently report less than 4 years of SH&E experience.");
-    if (pct < 50) issues.push("You currently report less than 50% preventative, professional-level safety work.");
-    if (preventive === "no") issues.push("BCSP requires at least 50% of the qualifying experience to be preventative, professional-level work.");
-    if (breadth === "no") issues.push("Your work history may not yet demonstrate the required breadth and depth of safety duties.");
-    if (credential === "Other") issues.push("Your selected credential is not confirmed by this checker as a BCSP Qualified Credential.");
-    if (credentialCurrent === "no") issues.push("Confirm the credential's current status before relying on it for a CSP application.");
-
-    if (foreignDegree === "yes") warnings.push("BCSP says a degree from outside the United States will be evaluated for U.S. equivalency; keep the required evaluation documents ready.");
-    if (preventive === "unsure") warnings.push("Confirm that at least half of your qualifying duties are preventative and professional-level.");
-    if (breadth === "unsure") warnings.push("Review your job descriptions and evidence for breadth and depth of safety duties.");
-    if (credentialCurrent === "unsure") warnings.push("Confirm the credential is current/acceptable before submitting the application.");
-    if (disclosure === "yes") warnings.push("BCSP separately reviews disclosed criminal convictions or professional-license/credential actions and may deny an application.");
-    if (disclosure === "unsure") warnings.push("If applicable, read BCSP's disclosure policy and answer the application questions accurately.");
-
-    const hardFail = issues.length > 0;
-    const needsReview = warnings.length > 0;
-    const status = hardFail ? "not-ready" : needsReview ? "review" : "strong";
-
-    return { issues, warnings, status };
-  }, [breadth, credential, credentialCurrent, degree, disclosure, foreignDegree, preventive, safetyPct, years]);
+  const yearsOk = Number(years) >= 4;
+  const preventativeOk = Number(preventative) >= 50;
+  const credentialOk = credential !== "OTHER";
+  const degreeOk = degree === "yes";
+  const preliminary = degreeOk && yearsOk && preventativeOk && credentialOk;
 
   return (
     <Shell>
-      <div className="sp-wrap max-w-4xl space-y-7">
-        <div>
-          <p className="sp-kicker">CSP application readiness</p>
-          <h1 className="sp-title mt-2 text-4xl">Deep CSP eligibility checker</h1>
-          <p className="mt-3 max-w-3xl text-pretty leading-7 text-fg-muted">
-            This is a preparation tool, not an eligibility ruling. It checks the main published CSP requirements against your answers and shows exactly what you should verify before paying an application fee.
+      <div className="sp-wrap max-w-5xl space-y-7">
+        <header>
+          <p className="sp-kicker">CSP candidate center · eligibility</p>
+          <h1 className="sp-title mt-2 text-4xl sm:text-5xl">Deep CSP eligibility pathway check</h1>
+          <p className="mt-4 max-w-3xl text-pretty text-lg leading-8 text-fg-muted">
+            This checker separates the normal CSP qualified-credential route from the Transitional Safety Practitioner (TSP) route. It is a planning aid only; BCSP makes the final eligibility decision.
           </p>
+        </header>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Link to="/csp-guide" className="sp-card p-5 no-underline"><p className="font-serif text-xl">CSP application guide</p><p className="mt-2 text-sm text-fg-muted">Requirements, documents, fees and process.</p></Link>
+          <Link to="/exam-booking" className="sp-card p-5 no-underline"><p className="font-serif text-xl">Exam booking</p><p className="mt-2 text-sm text-fg-muted">BCSP authorization → Pearson scheduling.</p></Link>
+          <a href="https://www.bcsp.org/transitional-safety-practitioner-tsp" target="_blank" rel="noreferrer" className="sp-card p-5 no-underline"><p className="font-serif text-xl">Official TSP rules</p><p className="mt-2 text-sm text-fg-muted">Open the current BCSP TSP page.</p></a>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="sp-card p-5"><p className="font-serif text-xl">Education</p><p className="mt-2 text-sm text-fg-muted">Bachelor's degree minimum. Foreign degrees require the BCSP equivalency process.</p></div>
-          <div className="sp-card p-5"><p className="font-serif text-xl">Experience</p><p className="mt-2 text-sm text-fg-muted">4 years SH&E experience with at least 50% preventative, professional-level work and breadth/depth.</p></div>
-          <div className="sp-card p-5"><p className="font-serif text-xl">Credential</p><p className="mt-2 text-sm text-fg-muted">A BCSP Qualified Credential is required, including NEBOSH National or International Diploma.</p></div>
-        </div>
-
-        <form
-          className="sp-card space-y-6 p-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setChecked(true);
-          }}
-        >
-          <div>
-            <p className="sp-kicker">1 · Education</p>
-            <label className="mt-2 block text-sm">Do you have at least a bachelor's degree?</label>
-            <select className="sp-field mt-1" value={degree} onChange={(e) => setDegree(e.target.value as "yes" | "no")}>
-              <option value="yes">Yes</option><option value="no">No</option>
-            </select>
-            <label className="mt-3 block text-sm">Was the degree awarded outside the United States?</label>
-            <select className="sp-field mt-1" value={foreignDegree} onChange={(e) => setForeignDegree(e.target.value as "yes" | "no")}>
-              <option value="yes">Yes / I need equivalency guidance</option><option value="no">No</option>
-            </select>
-          </div>
-
-          <div>
-            <p className="sp-kicker">2 · Professional experience</p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="block text-sm">Years of SH&E experience<input className="sp-field mt-1" inputMode="decimal" value={years} onChange={(e) => setYears(e.target.value)} /></label>
-              <label className="block text-sm">Approx. % of work that is safety/SH&E<input className="sp-field mt-1" inputMode="numeric" value={safetyPct} onChange={(e) => setSafetyPct(e.target.value)} /></label>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="mt-3 block text-sm">Is at least 50% preventative, professional-level work?<select className="sp-field mt-1" value={preventive} onChange={(e) => setPreventive(e.target.value as typeof preventive)}><option value="yes">Yes</option><option value="no">No</option><option value="unsure">Not sure</option></select></label>
-              <label className="mt-3 block text-sm">Does your experience show breadth and depth of safety duties?<select className="sp-field mt-1" value={breadth} onChange={(e) => setBreadth(e.target.value as typeof breadth)}><option value="yes">Yes</option><option value="no">No</option><option value="unsure">Not sure</option></select></label>
-            </div>
-          </div>
-
-          <div>
-            <p className="sp-kicker">3 · Qualifying credential</p>
-            <label className="block text-sm">Select your closest BCSP Qualified Credential<select className="sp-field mt-1" value={credential} onChange={(e) => setCredential(e.target.value as Credential)}>{CREDENTIALS.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label className="mt-3 block text-sm">Is the credential current/acceptable for your application?<select className="sp-field mt-1" value={credentialCurrent} onChange={(e) => setCredentialCurrent(e.target.value as typeof credentialCurrent)}><option value="yes">Yes</option><option value="no">No / expired</option><option value="unsure">Not sure</option></select></label>
-          </div>
-
-          <div>
-            <p className="sp-kicker">4 · Disclosure review</p>
-            <label className="block text-sm">Do you have a criminal conviction or professional-license/credential suspension, revocation, or probation that may need disclosure?<select className="sp-field mt-1" value={disclosure} onChange={(e) => setDisclosure(e.target.value as typeof disclosure)}><option value="no">No</option><option value="yes">Yes</option><option value="unsure">Not sure</option></select></label>
-          </div>
-
-          <button type="submit" className="sp-btn sp-btn-primary">Run deep eligibility check</button>
-        </form>
-
-        {checked ? (
-          <section className="sp-card p-6" aria-live="polite">
-            <p className="sp-kicker">Result</p>
-            <h2 className="sp-title mt-2 text-3xl">
-              {result.status === "strong" ? "Strong preliminary match" : result.status === "review" ? "Likely in range — verify these items" : "Not ready based on the answers entered"}
-            </h2>
-            {result.issues.length ? <div className="mt-5"><h3 className="font-serif text-xl">Requirements to fix or verify</h3><ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-fg-muted">{result.issues.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
-            {result.warnings.length ? <div className="mt-5"><h3 className="font-serif text-xl">Important review points</h3><ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-fg-muted">{result.warnings.map((item) => <li key={item}>{item}</li>)}</ul></div> : null}
-            <div className="mt-5 rounded-xl border border-line bg-surface-soft p-4 text-sm text-fg-muted">
-              <strong className="text-fg">Final authority:</strong> BCSP reviews the submitted application and payment and makes the eligibility decision. Do not treat this calculator as an approval.
-            </div>
-          </section>
-        ) : null}
 
         <section className="sp-card p-6">
-          <p className="sp-kicker">Application path</p>
-          <div className="mt-4 grid gap-3 md:grid-cols-5">
-            {["Check requirements", "Create BCSP profile", "Submit application + fee", "Receive eligibility", "Purchase & schedule exam"].map((step, i) => <div key={step} className="rounded-xl border border-line p-4"><span className="font-mono text-xs text-accent">0{i + 1}</span><p className="mt-2 font-serif">{step}</p></div>)}
+          <p className="sp-kicker">1 · Core CSP requirements</p>
+          <h2 className="sp-title mt-2 text-3xl">Enter your actual situation</h2>
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            <label className="block text-sm">Do you have at least a bachelor's degree?
+              <select className="sp-field mt-1" value={degree} onChange={(e) => setDegree(e.target.value)}><option value="yes">Yes</option><option value="no">No</option></select>
+            </label>
+            <label className="block text-sm">Was the degree earned outside the United States?
+              <select className="sp-field mt-1" value={foreignDegree} onChange={(e) => setForeignDegree(e.target.value)}><option value="yes">Yes</option><option value="no">No</option></select>
+            </label>
+            <label className="block text-sm">SH&amp;E professional experience (years)
+              <input className="sp-field mt-1" type="number" min="0" step="0.1" value={years} onChange={(e) => setYears(e.target.value)} />
+            </label>
+            <label className="block text-sm">Approximate % of qualifying work that was preventative/professional-level
+              <input className="sp-field mt-1" type="number" min="0" max="100" step="1" value={preventative} onChange={(e) => setPreventative(e.target.value)} />
+            </label>
           </div>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <a className="sp-btn sp-btn-primary" href="https://certification.bcsp.org/" target="_blank" rel="noreferrer">Open BCSP application</a>
-            <Link to="/csp-guide" className="sp-btn sp-btn-ghost">Read the CSP application & exam guide</Link>
+          <div className="mt-5 rounded-xl border border-line bg-surface-soft p-4 text-sm leading-6 text-fg-muted">
+            <strong className="text-fg">Foreign degree:</strong> BCSP says non-U.S. degrees are evaluated for U.S. equivalency during the application process. This is separate from the NEBOSH/TSP pathway and does not mean that a NEBOSH diploma itself needs a U.S. degree equivalency review.
           </div>
         </section>
 
-        <Link to="/assess" className="sp-btn sp-btn-ghost">Continue to self-assessment</Link>
+        <section className="sp-card p-6">
+          <p className="sp-kicker">2 · Qualified credential pathway</p>
+          <h2 className="sp-title mt-2 text-3xl">Which credential are you using for CSP?</h2>
+          <select className="sp-field mt-5" value={credential} onChange={(e) => setCredential(e.target.value as Credential)}>
+            <option value="NEBOSH_IDIP">NEBOSH International Diploma (IDip)</option>
+            <option value="NEBOSH_NDIP">NEBOSH National Diploma</option>
+            <option value="TSP">TSP — Transitional Safety Practitioner</option>
+            <option value="ASP">ASP — Associate Safety Professional</option>
+            <option value="GSP">GSP — Graduate Safety Practitioner</option>
+            <option value="CIH">CIH — Certified Industrial Hygienist</option>
+            <option value="CMIOSH">CMIOSH</option>
+            <option value="CFIOSH">CFIOSH</option>
+            <option value="CRSP">CRSP</option>
+            <option value="OTHER">Other / not listed</option>
+          </select>
+
+          {(credential === "NEBOSH_IDIP" || credential === "NEBOSH_NDIP") && (
+            <div className="mt-5 space-y-5 rounded-2xl border-2 border-accent/30 bg-accent/5 p-5">
+              <div>
+                <h3 className="font-serif text-2xl">NEBOSH → TSP pathway</h3>
+                <p className="mt-2 text-sm leading-6 text-fg-muted">
+                  BCSP's published QEP list states that holders of the NEBOSH National or International Diploma can apply for TSP within one year of achieving the credential. The current BCSP TSP page says QEP holders must apply within the program's applicable dates. Verify the live QEP list before relying on a deadline.
+                </p>
+              </div>
+              <label className="block text-sm">When was your NEBOSH result/credential awarded?
+                <input className="sp-field mt-1" type="date" value={neboshResultDate} onChange={(e) => setNeboshResultDate(e.target.value)} />
+              </label>
+              {neboshResultDate && <div className="rounded-xl border border-line bg-surface p-4 text-sm"><strong>One-year TSP application target:</strong> {formatDate(tspDeadline)}<br /><span className="text-fg-muted">This is a planning calculation from the published one-year rule; BCSP's live QEP applicability rules control.</span></div>}
+              <label className="block text-sm">Have you applied for TSP?
+                <select className="sp-field mt-1" value={tspApplied} onChange={(e) => setTspApplied(e.target.value)}><option value="not-yet">Not yet</option><option value="yes">Yes</option><option value="no">No / I decided not to</option></select>
+              </label>
+              {tspApplied === "yes" && <label className="block text-sm">TSP application date
+                <input className="sp-field mt-1" type="date" value={tspAppliedDate} onChange={(e) => setTspAppliedDate(e.target.value)} />
+              </label>}
+              <label className="block text-sm">If awarded, TSP award date (optional)
+                <input className="sp-field mt-1" type="date" value={tspAwardedDate} onChange={(e) => setTspAwardedDate(e.target.value)} />
+              </label>
+              {tspStatus === "action" && <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">Action: if you intend to use the TSP route, check the current BCSP QEP list and submit the TSP application within the applicable period.</div>}
+              {tspStatus === "late" && <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900">The one-year planning date has passed. Do not assume you are still eligible for TSP; contact BCSP and verify the current QEP applicable-date rule.</div>}
+              {tspStatus === "applied" && <div className="rounded-xl border border-green-300 bg-green-50 p-4 text-sm text-green-950">TSP application recorded. Keep your BCSP confirmation and award date. TSP holders must apply for and pass the CSP examination within six years of the TSP award date.</div>}
+              <div className="flex flex-wrap gap-3"><a className="sp-btn sp-btn-primary" href="https://www.bcsp.org/transitional-safety-practitioner-tsp" target="_blank" rel="noreferrer">BCSP TSP page</a><a className="sp-btn sp-btn-ghost" href="https://www.bcsp.org/wp-content/uploads/2022/07/BCSP-TSP-QEP-List.pdf" target="_blank" rel="noreferrer">Open QEP list</a></div>
+            </div>
+          )}
+
+          {credential === "TSP" && (
+            <div className="mt-5 rounded-xl border border-line bg-surface-soft p-5 text-sm leading-6 text-fg-muted">
+              <strong className="text-fg">TSP route:</strong> TSP satisfies the CSP qualified-credential requirement. BCSP states that TSP holders must apply for and pass the CSP examination within six years of the date the TSP is awarded. Enter your TSP award date in the dedicated tracking section below if you already hold it.
+            </div>
+          )}
+        </section>
+
+        <section className="sp-card p-6">
+          <p className="sp-kicker">3 · Preliminary result</p>
+          <h2 className="sp-title mt-2 text-3xl">Your pathway summary</h2>
+          <button type="button" className="mt-5 sp-btn sp-btn-primary" onClick={() => setSubmitted(true)}>Run deep check</button>
+          {submitted && (
+            <div className="mt-5 space-y-4">
+              <div className={`rounded-2xl border p-5 ${preliminary ? "border-green-300 bg-green-50" : "border-amber-300 bg-amber-50"}`}>
+                <h3 className="font-serif text-2xl">{preliminary ? "Preliminary match — verify with BCSP" : "Requirements appear incomplete"}</h3>
+                <ul className="mt-3 space-y-2 text-sm leading-6">
+                  <li>{degreeOk ? "✓" : "✗"} Bachelor's degree requirement</li>
+                  <li>{yearsOk ? "✓" : "✗"} At least 4 years SH&amp;E experience</li>
+                  <li>{preventativeOk ? "✓" : "✗"} At least 50% preventative/professional-level work</li>
+                  <li>{credentialOk ? "✓" : "✗"} A BCSP-listed qualified credential/pathway</li>
+                  <li>{foreignDegree === "yes" ? "ℹ" : "✓"} {foreignDegree === "yes" ? "Foreign-degree U.S.-equivalency review will be part of the BCSP process" : "No foreign-degree equivalency flag entered"}</li>
+                </ul>
+              </div>
+              {credential.startsWith("NEBOSH") && <div className="rounded-xl border border-accent/30 bg-accent/5 p-5 text-sm leading-6"><strong>Important NEBOSH point:</strong> BCSP's current CSP page lists the NEBOSH National or International Diploma itself as a qualified credential for CSP. The TSP route is an additional pathway for QEP graduates; it is not automatically a mandatory step before CSP when BCSP accepts the diploma directly. If you want TSP, track the one-year application window separately.</div>}
+            </div>
+          )}
+        </section>
+
+        <section className="sp-card p-6">
+          <p className="sp-kicker">4 · Exam booking</p>
+          <h2 className="sp-title mt-2 text-3xl">Why you cannot book Pearson directly yet</h2>
+          <p className="mt-3 max-w-3xl text-pretty leading-7 text-fg-muted">Pearson's BCSP page says you must first apply through BCSP, receive eligibility notification, and pay the examination authorization fee. Scheduling then happens through the Pearson SSO link from your BCSP My Profile. SafePath cannot create or reserve a Pearson appointment.</p>
+          <div className="mt-5 flex flex-wrap gap-3"><Link to="/exam-booking" className="sp-btn sp-btn-primary">Open step-by-step booking guide</Link><a className="sp-btn sp-btn-ghost" href="https://www.bcsp.org/certified-safety-professional-csp" target="_blank" rel="noreferrer">Open BCSP CSP</a><a className="sp-btn sp-btn-ghost" href="https://www.pearsonvue.com/us/en/bcsp.html" target="_blank" rel="noreferrer">Open Pearson BCSP</a></div>
+        </section>
+
+        <footer className="sp-card p-5 text-xs leading-6 text-fg-muted">
+          <strong className="text-fg">Important:</strong> This tool is not an eligibility ruling. BCSP's current rules, QEP/QAP applicable dates, application review, and credential decisions control. SafePath uses official-source information checked 5 September 2026 and should be rechecked before payment or submission.
+        </footer>
       </div>
     </Shell>
   );
