@@ -35,24 +35,21 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
 
   useEffect(() => {
     let live = true;
-    const classId = items[0]?.taskCode ? Number.NaN : Number.NaN;
-    void classId;
     setLoadingBank(true);
     setBankError(false);
 
-    // The class id is supplied through the lesson item wrapper below. The
-    // fallback items remain usable if Neon is temporarily unavailable.
-    const pathId = typeof window !== "undefined" ? Number(window.location.pathname.split("/").pop()) : NaN;
-    if (!Number.isInteger(pathId) || pathId < 1) {
+    const classId = typeof window !== "undefined"
+      ? Number(window.location.pathname.split("/").pop())
+      : Number.NaN;
+    if (!Number.isInteger(classId) || classId < 1) {
       setLoadingBank(false);
       return () => { live = false; };
     }
 
-    getLessonQuestions({ data: { classId: pathId } })
+    getLessonQuestions({ data: { classId } })
       .then((rows) => {
         if (!live) return;
-        if (rows.length) setBank(shuffle(rows));
-        else setBank(fallbackRows);
+        setBank(rows.length ? shuffle(rows) : fallbackRows);
       })
       .catch(() => {
         if (!live) return;
@@ -66,7 +63,7 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
     return () => {
       live = false;
     };
-  }, [fallbackRows, items]);
+  }, [fallbackRows]);
 
   const pool = useMemo(() => {
     const limit = mode === "core" ? 8 : mode === "mastery" ? 15 : bank.length;
@@ -78,7 +75,7 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
     setPicked(null);
     setScore(0);
     setAnswered([]);
-  }, [mode]);
+  }, [mode, bank]);
 
   const row = pool[index];
   if (!row) return <div className="sp-drill-empty"><span>✓</span><p>{loadingBank ? "Loading this lesson's matched question bank…" : "No drill items in this class yet."}</p></div>;
@@ -111,10 +108,6 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
     setIndex((n) => n - 1);
   }
 
-  function selectMode(next: DrillMode) {
-    setMode(next);
-  }
-
   return (
     <div className="sp-drill-shell">
       <div className="sp-drill-progress-head">
@@ -141,7 +134,7 @@ export function Drill({ items, onDone }: { items: ClassItem[]; onDone?: (score: 
                   key={option}
                   type="button"
                   className={`sp-btn ${active ? "sp-btn-primary" : "sp-btn-ghost"}`}
-                  onClick={() => selectMode(option)}
+                  onClick={() => setMode(option)}
                   aria-pressed={active}
                   disabled={option === "full" && bank.length <= 8}
                 >
