@@ -1,20 +1,11 @@
 /* User-selected accent layer. Loaded last so the chosen accent stays consistent across every theme. */
-:root {
-  --sp-user-accent:#0b7a43;
-  --sp-user-accent-dark:#075b35;
-  --sp-user-accent-soft:#dff1e7;
-  --sp-user-accent-pale:#f1f8f4;
-}
+:root { --sp-user-accent:#0b7a43; --sp-user-accent-dark:#075b35; --sp-user-accent-soft:#dff1e7; --sp-user-accent-pale:#f1f8f4; }
 
 html[data-sp-accent] .sp-btn-primary,
 html[data-sp-accent] .sp-rail-next-button,
 html[data-sp-accent] .sp-context-pill.is-active,
 html[data-sp-accent] .sp-step-button.is-active,
-html[data-sp-accent] .sp-note-index {
-  background:var(--sp-user-accent) !important;
-  border-color:var(--sp-user-accent) !important;
-  color:#fff !important;
-}
+html[data-sp-accent] .sp-note-index { background:var(--sp-user-accent) !important; border-color:var(--sp-user-accent) !important; color:#fff !important; }
 html[data-sp-accent] .sp-btn-primary:hover,
 html[data-sp-accent] .sp-rail-next-button:hover,
 html[data-sp-accent] .sp-context-pill.is-active:hover,
@@ -46,6 +37,24 @@ html[data-sp-accent] .sp-essential-item:hover,
 html[data-sp-accent] .sp-domain-tile:hover,
 html[data-sp-accent] .sp-class-card:hover { border-color:color-mix(in srgb,var(--sp-user-accent) 35%,#fff) !important; }
 html[data-sp-accent] a:not(.sp-btn):not(.sp-sidebar-link) { color:var(--sp-user-accent); }
+
+/* CSP Green header: navigation is text-first, not white pills. */
+html[data-sp-theme="csp-green"] .sp-top-nav .sp-btn-ghost { background:transparent !important; border-color:transparent !important; color:#eaf7f0 !important; box-shadow:none !important; }
+html[data-sp-theme="csp-green"] .sp-top-nav .sp-btn-ghost:hover { background:rgba(255,255,255,.10) !important; color:#fff !important; border-color:rgba(255,255,255,.14) !important; }
+html[data-sp-theme="csp-green"] .sp-brand { color:#fff !important; }
+html[data-sp-theme="csp-green"] .sp-brand span span:last-child { color:#d7efe2 !important; }
+html[data-sp-theme="csp-green"] .sp-top-nav .sp-btn-primary { box-shadow:0 2px 7px rgba(0,0,0,.18); }
+
+/* Incomplete-class confirmation */
+.sp-confirm-backdrop { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:22px; background:rgba(7,20,14,.58); backdrop-filter:blur(5px); }
+.sp-confirm-dialog { width:min(520px,100%); padding:28px; border:1px solid #d7e4dc; border-radius:18px; background:#fff; box-shadow:0 24px 70px rgba(7,24,15,.25); color:#172a3d; }
+.sp-confirm-icon { display:grid; place-items:center; width:40px; height:40px; margin-bottom:14px; border-radius:12px; background:#fff3d6; color:#9b6200; font-weight:900; font-size:1.1rem; }
+.sp-confirm-dialog h2 { margin-top:6px; font:600 clamp(1.55rem,3vw,2rem)/1.15 Georgia,"Times New Roman",serif; letter-spacing:-.02em; }
+.sp-confirm-dialog > p:not(.sp-kicker) { margin-top:12px; color:#607488; line-height:1.72; }
+.sp-confirm-checklist { display:grid; grid-template-columns:22px 1fr; gap:7px 8px; margin-top:18px; padding:14px 15px; border:1px solid #e2e9e5; border-radius:11px; background:#f8faf9; color:#42586d; font-size:.86rem; line-height:1.55; }
+.sp-confirm-checklist span:nth-child(odd) { color:var(--sp-user-accent); font-weight:900; }
+.sp-confirm-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:22px; }
+@media (max-width:560px) { .sp-confirm-dialog { padding:22px; } .sp-confirm-actions { flex-direction:column-reverse; } .sp-confirm-actions .sp-btn { width:100%; } }
 
 /* Color controls */
 .appearance-accent-panel { margin-top:26px; padding:20px; border:1px solid var(--border,#dce6e1); border-radius:15px; background:var(--bg,#fff); }
