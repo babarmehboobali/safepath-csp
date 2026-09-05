@@ -12,9 +12,41 @@ export type StudyPlan = {
   dailyHours: number;
 };
 
-const KEY = "safepath.plan.v1";
+export type PlanDeadlineStatus = {
+  today: string;
+  daysRemaining: number;
+  daysElapsed: number;
+  totalDays: number;
+  totalClasses: number;
+  completedClasses: number;
+  remainingClasses: number;
+  actualPct: number;
+  expectedPct: number;
+  gapPct: number;
+  requiredClassesPerDay: number;
+  plannedClassesPerWeek: number;
+  plannedFinishDate: string;
+  daysAheadOrBehind: number;
+  status: "ahead" | "on-track" | "behind" | "deadline-passed" | "plan-too-slow";
+  label: string;
+  detail: string;
+};
 
+const KEY = "safepath.plan.v1";
 export const PLANNER_MODES: PlannerMode[] = ["adaptive", "mix", "domain", "choice"];
+
+function localDateString(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function addDays(dateString: string, days: number) {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return localDateString(date);
+}
 
 export function defaultPlan(): StudyPlan {
   const start = new Date();
@@ -62,6 +94,76 @@ export function daysBetween(a: string, b: string) {
   const start = new Date(`${a}T00:00:00`).getTime();
   const end = new Date(`${b}T00:00:00`).getTime();
   return Math.max(0, Math.round((end - start) / 86400000));
+}
+
+export function planDeadlineStatus(plan: StudyPlan, track: TrackId, completed: number[]): PlanDeadlineStatus {
+  const pool = catalogForTrack(track);
+  const active = plan.domains.length ? plan.domains : [1, 2, 3, 4, 5, 6, 7];
+  const plannedRows = pool.filter((row) => active.includes(row.domain));
+  const totalClasses = plannedRows.length;
+  const completedClasses = plannedRows.filter((row) => completed.includes(row.id)).length;
+  const remainingClasses = Math.max(0, totalClasses - completedClasses);
+  const today = localDateString();
+  const totalDays = daysBetween(plan.startDate, plan.examDate);
+  const daysRemaining = daysBetween(today, plan.examDate);
+  const daysElapsed = Math.max(0, Math.min(totalDays, daysBetween(plan.startDate, today)));
+  const actualPct = totalClasses ? Math.round((completedClasses / totalClasses) * 100) : 0;
+  const expectedPct = totalDays ? Math.min(100, Math.round((daysElapsed / totalDays) * 100)) : 0;
+  const gapPct = actualPct - expectedPct;
+  const plannedClassesPerWeek = 5;
+  const plannedWeeks = Math.ceil(totalClasses / plannedClassesPerWeek);
+  const plannedFinishDate = addDays(plan.startDate, plannedWeeks * 7);
+  const daysAheadOrBehind = daysBetween(today, plannedFinishDate) * (plannedFinishDate >= today ? 1 : -1);
+  const requiredClassesPerDay = daysRemaining > 0 ? remainingClasses / daysRemaining : remainingClasses;
+
+  let status: PlanDeadlineStatus["status"];
+  let label: string;
+  let detail: string;
+  if (daysRemaining <= 0 && remainingClasses > 0) {
+    status = "deadline-passed";
+    label = "Deadline missed";
+    detail = `${remainingClasses} planned ${remainingClasses === 1 ? "class remains" : "classes remain"} after the target date.`;
+  } else if (plannedFinishDate > plan.examDate) {
+    status = "plan-too-slow";
+    label = "Plan misses deadline";
+    detail = `At ${plannedClassesPerWeek} classes/week, the generated map finishes after your exam target.`;
+  } else if (remainingClasses === 0) {
+    status = "ahead";
+    label = "Course complete";
+    detail = "All classes in your selected plan are complete. Use Practice and Mock Exams for final readiness.";
+  } else if (gapPct >= 5) {
+    status = "ahead";
+    label = "Ahead of plan";
+    detail = `${actualPct}% complete vs ${expectedPct}% expected by today.`;
+  } else if (gapPct >= -5) {
+    status = "on-track";
+    label = "On track for deadline";
+    detail = `${actualPct}% complete vs ${expectedPct}% expected by today.`;
+  } else {
+    status = "behind";
+    label = "Behind plan";
+    detail = `${actualPct}% complete vs ${expectedPct}% expected by today. You need about ${requiredClassesPerDay.toFixed(1)} classes/day to catch up.`;
+  }
+
+  return {
+    today,
+    daysRemaining,
+    daysElapsed,
+    totalDays,
+    totalClasses,
+    completedClasses,
+    remainingClasses,
+    actualPct,
+    expectedPct,
+    gapPct,
+    requiredClassesPerDay,
+    plannedClassesPerWeek,
+    plannedFinishDate,
+    daysAheadOrBehind,
+    status,
+    label,
+    detail,
+  };
 }
 
 export function buildWeeks(plan: StudyPlan, track: TrackId, completed: number[]) {
