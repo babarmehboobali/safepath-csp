@@ -3,7 +3,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 export const APPEARANCE_STORAGE_KEY = "safepath-appearance";
 
 export const APPEARANCE_STYLES = [
-  { id: "professional", label: "Professional Light", description: "The clean CSP study layout from your reference", tone: "Recommended" },
+  { id: "csp-green", label: "CSP Green", description: "The complete SafePath study layout with balanced typography, spacing, and CSP green accents", tone: "Recommended" },
+  { id: "professional", label: "Professional Light", description: "The clean CSP study layout from your reference", tone: "Light" },
   { id: "modern", label: "Modern", description: "Clean, professional, and easy to read", tone: "Light" },
   { id: "classic", label: "Classic", description: "The original SafePath look", tone: "Original" },
   { id: "dark", label: "Dark", description: "Dark mode for low-light study", tone: "Low light" },
@@ -27,15 +28,18 @@ function isAppearanceId(value: string | null): value is AppearanceId {
 
 function applyAppearance(id: AppearanceId) {
   document.documentElement.dataset.spTheme = id;
-  document.documentElement.style.colorScheme = id === "professional" || id === "modern" || id === "minimal" || id === "ocean" || id === "sunset" || id === "purple" ? "light" : "dark";
+  document.documentElement.style.colorScheme =
+    id === "csp-green" || id === "professional" || id === "modern" || id === "minimal" || id === "ocean" || id === "sunset" || id === "purple"
+      ? "light"
+      : "dark";
 }
 
 export function AppearanceProvider({ children }: { children: React.ReactNode }) {
-  const [appearance, setAppearanceState] = useState<AppearanceId>("professional");
+  const [appearance, setAppearanceState] = useState<AppearanceId>("csp-green");
 
   useEffect(() => {
     const saved = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    const next = isAppearanceId(saved) ? saved : "professional";
+    const next = isAppearanceId(saved) ? saved : "csp-green";
     setAppearanceState(next);
     applyAppearance(next);
   }, []);
