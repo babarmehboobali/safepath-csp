@@ -1,0 +1,185 @@
+SAFEPATH CSP — ONE TASK PER CHAT (STOP / SAVE / NEW CHAT)
+Current working chat (do not paste the whole overnight file here again):
+https://grok.com/c/ca72b213-0fa8-4077-96e5-af7218c37a3a?rid=3a999b3b-b47a-4fe7-b76a-d266108f9c18
+
+Rule: one task, save files + STATUS.md, STOP. Owner opens a NEW Build chat for the next task.
+Never “finish the whole package” in one conversation.
+
+================================================================================
+MESSAGE 1 — PASTE NOW IN THE CURRENT CHAT
+================================================================================
+
+STOP expanding scope. Do not start a new app. Do not rewrite all classes.
+
+1) Finish ONLY the file you are editing right now. Do not open the next class.
+2) Write or update docs/OVERNIGHT_STATUS.md with:
+   - Product: Safepath CSP
+   - Last completed task id (T0, T1, T2…)
+   - Last completed class file name
+   - Next task id
+   - What must not be redone
+3) List files you changed in this chat.
+4) Reply with exactly this block and then STOP:
+
+STATUS
+Done: [task id]
+Next: [task id]
+Last file: [path]
+Do not continue.
+
+If you already corrupted a half-written class, revert that file to the last good version and note it.
+
+================================================================================
+MESSAGE 2 — FIRST LINE OF EVERY NEW CHAT AFTER THIS
+================================================================================
+
+You are continuing Safepath CSP in the EXISTING repo/folder safepath-csp only.
+Do not create a second project. No student chatbot.
+Demo demo@cspcoach.app / Demo1234! does not save. Real users save.
+Read docs/OVERNIGHT_STATUS.md first if it exists.
+Do ONLY the single task I paste after this paragraph.
+When that task is saved, update OVERNIGHT_STATUS.md and STOP.
+Do not start the next task even if you have tokens left.
+
+Then paste ONE task from the list below (T0, T1, T2…).
+
+================================================================================
+TASK QUEUE (ONE PER NEW BUILD CHAT)
+================================================================================
+
+T0 — STATUS ONLY
+Read the repo. Write docs/OVERNIGHT_STATUS.md: player status, exam-mode status, class files that already have Standard >300 words vs short ones. STOP. No code except the status file.
+
+T1 — PLAYER ONLY
+Upgrade InstructorLessonDeck + /learn/[id] only:
+guided steps, Continue/Back footer, must-score + stem-if-then slides if fields exist,
+calculator collapsed, audio collapsed, no practice-tool dump on the class page.
+Add Prisma fields mustScoreJson and stemIfThenJson if missing; migrate/seed those two fields as [] for all classes.
+Do not rewrite class notes. STOP.
+
+T2 — NAV + DASHBOARD ONLY
+Primary nav: Dashboard | Learn | Practice | Mock | Account.
+Move extra tools under Practice → Advanced.
+Dashboard = one next-action CTA.
+No class content edits. STOP.
+
+T3 — EXAM MODE ONLY
+ExamSitting: one item, flag, review grid, change answers, 50/82.5 100/165 200/330,
+timer does not pause, cards off, calculator on, submit lock, demo not saved.
+Copy: Select an answer before you flag.
+No class rewrites. STOP.
+
+T4 — CLASSES 2, 5, 22, 64 ONLY
+Upgrade only these four to density standard:
+must-score 5–8, stem-if-then 4–6, Brief ≤80 words, Standard 350–500, Deep 650–900,
+≥12 original items, errorCode+taskCode, contrast+traps.
+Do not touch other class files. STOP.
+
+T5 — CLASSES 1, 3, 4, 6
+Same density. STOP.
+
+T6 — CLASSES 7, 8, 9, 10
+Same density. STOP.
+
+T7 — CLASSES 11, 12, 13, 14
+Same density. STOP.
+
+T8 — CLASSES 15, 16
+Same density. Domain 1 pack complete note in STATUS. STOP.
+
+T9 — CLASSES 17–20
+STOP.
+
+T10 — CLASSES 21–24
+STOP.
+
+T11 — CLASSES 25–28
+STOP.
+
+T12 — CLASSES 29–32
+STOP.
+
+T13 — CLASSES 33–38
+Domain 2 complete note. STOP.
+
+T14 — CLASSES 39–42
+STOP.
+
+T15 — CLASSES 43–46
+Domain 3 complete note. STOP.
+
+T16 — CLASSES 47–50
+STOP.
+
+T17 — CLASSES 51–54
+Domain 4 complete note. STOP.
+
+T18 — CLASSES 55–60
+Domain 5 complete note. STOP.
+
+T19 — CLASSES 61–64
+STOP.
+
+T20 — CLASSES 65–68
+STOP.
+
+T21 — CLASSES 69–72
+Class 72 keeps ≥40 gym items + keystrokes. Domain 6 note. STOP.
+
+T22 — CLASSES 73–78
+Domain 7 note. STOP.
+
+T23 — CLASSES 79–84
+STOP.
+
+T24 — CLASSES 85–90
+Maximum note. STOP.
+
+T25 — CLASSES 91–95
+STOP.
+
+T26 — CLASSES 96–100
+STOP.
+
+T27 — CLASSES 101+ EXISTING ONLY
+Upgrade if they add unique coverage. Delete or hide if they duplicate 1–100.
+Do not add new class numbers. STOP.
+
+T28 — QA PASS
+Word-count audit of Standard/Deep. List IDs still under 300/500.
+Fix only the five worst. Phone-test notes in STATUS. STOP.
+
+================================================================================
+DENSITY STANDARD (ATTACH TO ANY T4–T27 TASK)
+================================================================================
+Each class in that task:
+- hook, one rule, mustScore 5–8, stemIfThen 4–6
+- model + worked case numbered + 3 traps + 4 contrast pairs
+- Brief ≤80w, Standard 350–500w (Rule / Field / Exam), Deep 650–900w
+- card + teach-back
+- ≥12 original 4-option items, one attractive wrong field answer
+- error codes: HIER PELTLV TOOL UNIT STEM FORM FIN TIME
+- Exam default: if two answers work, higher hierarchy / system / design
+- Original work only. No fake OSHA clauses you are unsure of.
+- Class 1 is the quality floor; do not thin it.
+
+================================================================================
+IF THE BOT STOPS MID-TASK
+================================================================================
+Same chat first try:
+Continue the CURRENT task only. Finish the open file. Update STATUS. STOP.
+
+If it loops or dies again: NEW chat + Message 2 + the SAME task id (T12 etc.) +
+“Resume incomplete files from STATUS. Do not redo completed class IDs listed there.”
+
+================================================================================
+OWNER CHECKLIST
+================================================================================
+[ ] Paste Message 1 in the current chat now
+[ ] Wait until it prints the STATUS block
+[ ] New chat → Message 2 + T0 or T1 (if player not done) or T4 (if player already done)
+[ ] After each stop, open STATUS.md, tick the task, start NEW chat
+[ ] Do not paste the old “all classes overnight” file again
+[ ] Auto Top-Up off unless you accept extra credits
+[ ] Vercel still later
+}

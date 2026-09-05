@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /__grok/
+Disallow: /account
+Disallow: /settings
+
+Sitemap: https://safepath-csp.com/sitemap.xml

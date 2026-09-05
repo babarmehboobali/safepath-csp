@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "SafePath CSP",
+      "hasCanvas": false,
+      "bodyTextLen": 3577,
+      "bodyTextHash": "249b0fab8c597699bff8b5c9199c433e1fe6c3eef934631bb10374f3380c134c",
+      "bodyTextPrefix": "SafePath Today Studio Assess Mock Cards Log in Menu SAFEPATH CSP",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "SafePath CSP",
+      "hasCanvas": false,
+      "bodyTextLen": 3539,
+      "bodyTextHash": "3938a056e5810103cc5460fb7d6b6abb8c780a4c468ce8e56e608082b046566e",
+      "bodyTextPrefix": "SafePath Menu SAFEPATH CSP See the control before you pick the a",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
